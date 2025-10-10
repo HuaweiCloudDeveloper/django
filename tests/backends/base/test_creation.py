@@ -5,7 +5,7 @@ from unittest import mock
 
 from django.db import DEFAULT_DB_ALIAS, connection, connections
 from django.db.backends.base.creation import TEST_DATABASE_PREFIX, BaseDatabaseCreation
-from django.test import SimpleTestCase, TransactionTestCase
+from django.test import SimpleTestCase, TransactionTestCase, skipUnlessDBFeature
 from django.test.utils import override_settings
 
 from ..models import (
@@ -240,6 +240,7 @@ class TestDeserializeDbFromString(TransactionTestCase):
         self.assertEqual(obj_a.obj, obj_b)
         self.assertEqual(obj_b.obj, obj_a)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_serialize_db_to_string_base_manager(self):
         SchoolClass.objects.create(year=1000, last_updated=datetime.datetime.now())
         with mock.patch("django.db.migrations.loader.MigrationLoader") as loader:
@@ -251,6 +252,7 @@ class TestDeserializeDbFromString(TransactionTestCase):
         self.assertIn('"model": "backends.schoolclass"', data)
         self.assertIn('"year": 1000', data)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_serialize_db_to_string_base_manager_with_prefetch_related(self):
         sclass = SchoolClass.objects.create(
             year=2000, last_updated=datetime.datetime.now()

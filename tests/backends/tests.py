@@ -45,6 +45,7 @@ from .models import (
 
 
 class DateQuotingTest(TestCase):
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_django_date_trunc(self):
         """
         Test the custom ``django_date_trunc method``, in particular against
@@ -55,6 +56,7 @@ class DateQuotingTest(TestCase):
         years = SchoolClass.objects.dates("last_updated", "year")
         self.assertEqual(list(years), [datetime.date(2010, 1, 1)])
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_django_date_extract(self):
         """
         Test the custom ``django_date_extract method``, in particular against fields
@@ -195,10 +197,12 @@ class LongNameTest(TransactionTestCase):
 
     available_apps = ["backends"]
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_sequence_name_length_limits_create(self):
         """Creation of model with long name and long pk name doesn't error."""
         VeryLongModelNameZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ.objects.create()
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_sequence_name_length_limits_m2m(self):
         """
         An m2m save of a model with a long name and a long m2m field name
@@ -210,6 +214,7 @@ class LongNameTest(TransactionTestCase):
         rel_obj = Person.objects.create(first_name="Django", last_name="Reinhardt")
         obj.m2m_also_quite_long_zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz.add(rel_obj)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_sequence_name_length_limits_flush(self):
         """
         Sequence resetting as part of a flush with model with long name and

@@ -13,6 +13,7 @@ from django.test import (
     TransactionTestCase,
     override_settings,
     skipIfDBFeature,
+    skipUnlessDBFeature,
 )
 from django.utils import timezone
 from django.utils.deprecation import RemovedInDjango60Warning
@@ -198,6 +199,7 @@ class SqlFlushTests(TransactionTestCase):
     def test_sql_flush_no_tables(self):
         self.assertEqual(connection.ops.sql_flush(no_style(), []), [])
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_execute_sql_flush_statements(self):
         with transaction.atomic():
             author = Author.objects.create(name="George Orwell")
