@@ -1551,7 +1551,7 @@ class OperationTests(OperationTestBase):
         Pony = new_state.apps.get_model("test_adchfl", "Pony")
         pony = Pony.objects.get(pk=pony.pk)
         self.assertEqual(pony.text, "some text")
-        self.assertEqual(pony.empty, "")
+        self.assertEqual(pony.empty, " ")
         self.assertEqual(pony.digits, "42")
         self.assertEqual(pony.quotes, '"\'"')
 
@@ -1596,7 +1596,7 @@ class OperationTests(OperationTestBase):
         Pony = new_state.apps.get_model("test_adtxtfl", "Pony")
         pony = Pony.objects.get(pk=pony.pk)
         self.assertEqual(pony.text, "some text")
-        self.assertEqual(pony.empty, "")
+        self.assertEqual(pony.empty, " ")
         self.assertEqual(pony.digits, "42")
         self.assertEqual(pony.quotes, '"\'"')
 
