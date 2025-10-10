@@ -1,12 +1,13 @@
 from django.db import connection
 from django.db.models import Value
 from django.db.models.functions import Length, LPad, RPad
-from django.test import TestCase
+from django.test import TestCase, skipUnlessDBFeature
 
 from ..models import Author
 
 
 class PadTests(TestCase):
+    @skipUnlessDBFeature("supports_lpad_empty_string")
     def test_pad(self):
         Author.objects.create(name="John", alias="j")
         none_value = (

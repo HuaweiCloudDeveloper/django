@@ -771,6 +771,7 @@ class FastDeleteTests(TestCase):
                 (0, {}),
             )
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_fast_delete_combined_relationships(self):
         # The cascading fast-delete of SecondReferrer should be combined
         # in a single DELETE WHERE referrer_id OR unique_field.

@@ -574,6 +574,7 @@ class TestFixtures(TestCase):
             verbosity=0,
         )
 
+    @skipUnlessDBFeature("supports_table_check_constraints")
     def test_loaddata_with_m2m_to_self(self):
         """
         Regression test for ticket #17946.

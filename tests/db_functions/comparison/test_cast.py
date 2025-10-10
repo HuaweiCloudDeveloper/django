@@ -86,6 +86,7 @@ class CastTests(TestCase):
         )
         self.assertEqual(numbers.get().cast_fk, 0)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_cast_to_duration(self):
         duration = datetime.timedelta(days=1, seconds=2, microseconds=3)
         DTModel.objects.create(duration=duration)
@@ -96,6 +97,7 @@ class CastTests(TestCase):
         self.assertEqual(dtm.cast_duration, duration)
         self.assertEqual(dtm.cast_neg_duration, -duration)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_cast_from_db_datetime_to_date(self):
         dt_value = datetime.datetime(2018, 9, 28, 12, 42, 10, 234567)
         DTModel.objects.create(start_datetime=dt_value)
@@ -104,6 +106,7 @@ class CastTests(TestCase):
         ).first()
         self.assertEqual(dtm.start_datetime_as_date, datetime.date(2018, 9, 28))
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_cast_from_db_datetime_to_time(self):
         dt_value = datetime.datetime(2018, 9, 28, 12, 42, 10, 234567)
         DTModel.objects.create(start_datetime=dt_value)
@@ -117,6 +120,7 @@ class CastTests(TestCase):
             dtm.start_datetime_as_time, datetime.time(12, 42, 10, rounded_ms)
         )
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_cast_from_db_date_to_datetime(self):
         dt_value = datetime.date(2018, 9, 28)
         DTModel.objects.create(start_date=dt_value)
@@ -127,6 +131,7 @@ class CastTests(TestCase):
             dtm.start_as_datetime, datetime.datetime(2018, 9, 28, 0, 0, 0, 0)
         )
 
+    @skipUnlessDBFeature("supports_date_cast")
     def test_cast_from_db_datetime_to_date_group_by(self):
         author = Author.objects.create(name="John Smith", age=45)
         dt_value = datetime.datetime(2018, 9, 28, 12, 42, 10, 234567)
@@ -141,7 +146,7 @@ class CastTests(TestCase):
         )
         self.assertEqual(fans[0]["fan_for_day"], datetime.date(2018, 9, 28))
         self.assertEqual(fans[0]["fans"], 1)
-
+    @skipUnlessDBFeature("supports_date_cast")
     def test_cast_from_python_to_date(self):
         today = datetime.date.today()
         dates = Author.objects.annotate(cast_date=Cast(today, models.DateField()))

@@ -19,14 +19,17 @@ class JSONObjectTests(TestCase):
             ]
         )
 
+    @skipUnlessDBFeature("supports_json_object_function")
     def test_empty(self):
         obj = Author.objects.annotate(json_object=JSONObject()).first()
         self.assertEqual(obj.json_object, {})
 
+    @skipUnlessDBFeature("supports_json_object_function")
     def test_basic(self):
         obj = Author.objects.annotate(json_object=JSONObject(name="name")).first()
         self.assertEqual(obj.json_object, {"name": "Ivan Ivanov"})
 
+    @skipUnlessDBFeature("supports_json_object_function")
     def test_expressions(self):
         obj = Author.objects.annotate(
             json_object=JSONObject(
@@ -48,6 +51,7 @@ class JSONObjectTests(TestCase):
             },
         )
 
+    @skipUnlessDBFeature("supports_json_object_function")
     def test_nested_json_object(self):
         obj = Author.objects.annotate(
             json_object=JSONObject(
@@ -69,6 +73,7 @@ class JSONObjectTests(TestCase):
             },
         )
 
+    @skipUnlessDBFeature("supports_json_object_function")
     def test_nested_empty_json_object(self):
         obj = Author.objects.annotate(
             json_object=JSONObject(
@@ -84,6 +89,7 @@ class JSONObjectTests(TestCase):
             },
         )
 
+    @skipUnlessDBFeature("supports_json_object_function")
     def test_textfield(self):
         Article.objects.create(
             title="The Title",
@@ -93,12 +99,14 @@ class JSONObjectTests(TestCase):
         obj = Article.objects.annotate(json_object=JSONObject(text=F("text"))).first()
         self.assertEqual(obj.json_object, {"text": "x" * 4000})
 
+    @skipUnlessDBFeature("supports_json_object_function")
     def test_order_by_key(self):
         qs = Author.objects.annotate(attrs=JSONObject(alias=F("alias"))).order_by(
             "attrs__alias"
         )
         self.assertQuerySetEqual(qs, Author.objects.order_by("alias"))
 
+    @skipUnlessDBFeature("supports_json_object_function")
     def test_order_by_nested_key(self):
         qs = Author.objects.annotate(
             attrs=JSONObject(nested=JSONObject(alias=F("alias")))

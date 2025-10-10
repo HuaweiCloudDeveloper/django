@@ -401,6 +401,7 @@ class DeleteDistinct(SimpleTestCase):
 
 
 class SetQueryCountTests(TestCase):
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_set_querycount(self):
         policy = Policy.objects.create()
         version = Version.objects.create(policy=policy)

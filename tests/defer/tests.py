@@ -1,5 +1,5 @@
 from django.core.exceptions import FieldDoesNotExist, FieldError
-from django.test import SimpleTestCase, TestCase
+from django.test import SimpleTestCase, TestCase, skipUnlessDBFeature
 
 from .models import (
     BigChild,
@@ -264,6 +264,7 @@ class TestDefer2(AssertionMixin, TestCase):
         self.assertEqual(s1, s1_defer)
         self.assertEqual(s1_defer, s1)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_refresh_not_loading_deferred_fields(self):
         s = Secondary.objects.create()
         rf = Primary.objects.create(name="foo", value="bar", related=s)
@@ -277,6 +278,7 @@ class TestDefer2(AssertionMixin, TestCase):
         with self.assertNumQueries(1):
             self.assertEqual(rf2.name, "new foo")
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_custom_refresh_on_deferred_loading(self):
         s = Secondary.objects.create()
         rf = RefreshPrimaryProxy.objects.create(name="foo", value="bar", related=s)
@@ -290,6 +292,7 @@ class TestDefer2(AssertionMixin, TestCase):
             self.assertEqual(rf2.name, "new foo")
             self.assertEqual(rf2.value, "new bar")
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_refresh_when_one_field_deferred(self):
         s = Secondary.objects.create()
         PrimaryOneToOne.objects.create(name="foo", value="bar", related=s)

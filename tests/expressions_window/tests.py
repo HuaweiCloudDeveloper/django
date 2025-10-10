@@ -51,6 +51,7 @@ from .models import Classification, Detail, Employee, PastEmployeeDepartment
 @skipUnlessDBFeature("supports_over_clause")
 class WindowFunctionTests(TestCase):
     @classmethod
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def setUpTestData(cls):
         classification = Classification.objects.create()
         Employee.objects.bulk_create(

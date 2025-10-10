@@ -1,7 +1,7 @@
 from django.db import connection
 from django.db.models import CharField
 from django.db.models.functions import MD5
-from django.test import TestCase
+from django.test import TestCase, skipUnlessDBFeature
 from django.test.utils import register_lookup
 
 from ..models import Author
@@ -9,6 +9,7 @@ from ..models import Author
 
 class MD5Tests(TestCase):
     @classmethod
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def setUpTestData(cls):
         Author.objects.bulk_create(
             [

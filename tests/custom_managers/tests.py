@@ -1,5 +1,5 @@
 from django.db import models
-from django.test import TestCase
+from django.test import TestCase, skipUnlessDBFeature
 
 from .models import (
     Book,
@@ -715,6 +715,7 @@ class CustomManagersRegressTestCase(TestCase):
         # there would now be two objects in the database.
         self.assertEqual(RestrictedModel.plain_manager.count(), 1)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_refresh_from_db_when_default_manager_filters(self):
         """
         Model.refresh_from_db() works for instances hidden by the default
@@ -725,6 +726,7 @@ class CustomManagersRegressTestCase(TestCase):
         book.refresh_from_db()
         self.assertEqual(book.title, "Hi")
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_save_clears_annotations_from_base_manager(self):
         """Model.save() clears annotations from the base manager."""
         self.assertEqual(Book._meta.base_manager.name, "annotated_objects")
