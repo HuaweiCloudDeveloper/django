@@ -1009,6 +1009,7 @@ class OperationTests(OperationTestBase):
         with connection.schema_editor() as editor, self.assertNumQueries(0):
             operation.database_forwards(app_label, editor, project_state, new_state)
 
+    @skipUnlessDBFeature("can_defer_constraint_checks")
     def test_rename_model_with_self_referential_m2m(self):
         app_label = "test_rename_model_with_self_referential_m2m"
 
@@ -1531,7 +1532,7 @@ class OperationTests(OperationTestBase):
                 migrations.AddField(
                     "Pony",
                     "empty",
-                    models.CharField(max_length=10, default=""),
+                    models.CharField(max_length=10, default=" "),
                 ),
                 # If not properly quoted digits would be interpreted as an int.
                 migrations.AddField(
@@ -1576,7 +1577,7 @@ class OperationTests(OperationTestBase):
                 migrations.AddField(
                     "Pony",
                     "empty",
-                    models.TextField(default=""),
+                    models.TextField(default=" "),
                 ),
                 # If not properly quoted digits would be interpreted as an int.
                 migrations.AddField(
@@ -1869,6 +1870,7 @@ class OperationTests(OperationTestBase):
             },
         )
 
+    @skipUnlessDBFeature("supports_covering_indexes")
     def test_add_field_m2m(self):
         """
         Tests the AddField operation with a ManyToManyField.
@@ -2334,6 +2336,7 @@ class OperationTests(OperationTestBase):
         pony = project_state.apps.get_model(app_label, "pony").objects.create(weight=1)
         self.assertEqual(pony.pink, 3)
 
+    @skipUnlessDBFeature("supports_multiple_alter_column")
     def test_alter_field_change_nullable_to_database_default_not_null(self):
         """
         The AlterField operation changing a null field to db_default.
@@ -2579,6 +2582,7 @@ class OperationTests(OperationTestBase):
             definition[2], {"name": "Pony", "table_comment": "Custom pony comment"}
         )
 
+    @skipUnlessDBFeature("supports_alter_column_to_serial")
     def test_alter_field_pk(self):
         """
         The AlterField operation on primary keys (things like PostgreSQL's
@@ -2608,7 +2612,7 @@ class OperationTests(OperationTestBase):
                 "test_alflpk", editor, new_state, project_state
             )
 
-    @skipUnlessDBFeature("supports_foreign_keys")
+    @skipUnlessDBFeature("supports_foreign_keys", "supports_alter_column_to_serial")
     def test_alter_field_pk_fk(self):
         """
         Tests the AlterField operation on primary keys changes any FKs pointing to it.
@@ -2778,6 +2782,7 @@ class OperationTests(OperationTestBase):
         with connection.schema_editor() as editor:
             operation.database_backwards(app_label, editor, new_state, project_state)
 
+    @skipUnlessDBFeature("supports_alter_column_to_serial")
     def test_alter_field_pk_mti_fk(self):
         app_label = "test_alflpkmtifk"
         project_state = self.set_up_test_model(app_label, mti_model=True)
@@ -2862,6 +2867,7 @@ class OperationTests(OperationTestBase):
                 (f"{app_label}_shetlandpony", "pony_ptr_id"),
             )
 
+    @skipUnlessDBFeature("supports_alter_column_to_serial")
     def test_alter_field_pk_mti_and_fk_to_base(self):
         app_label = "test_alflpkmtiftb"
         project_state = self.set_up_test_model(
@@ -3016,7 +3022,7 @@ class OperationTests(OperationTestBase):
         self.assertEqual(id_type, fk_type)
         self.assertEqual(id_null, fk_null)
 
-    @skipUnlessDBFeature("supports_foreign_keys")
+    @skipUnlessDBFeature("supports_foreign_keys", "supports_alter_field_with_to_field")
     def test_alter_field_reloads_state_fk_with_to_field_related_name_target_type_change(
         self,
     ):
@@ -4384,9 +4390,9 @@ class OperationTests(OperationTestBase):
                     "Author",
                     fields=[
                         ("id", models.AutoField(primary_key=True)),
-                        ("name", models.CharField(max_length=100)),
-                        ("surname", models.CharField(max_length=100, db_default="")),
-                        ("rebate", models.CharField(max_length=100)),
+                        ("name", models.CharField(max_length=100, default=" ")),
+                        ("surname", models.CharField(max_length=100, db_default=" ")),
+                        ("rebate", models.CharField(max_length=100, default="0%")),
                     ],
                     options={"constraints": [constraint]},
                 )
@@ -4414,9 +4420,9 @@ class OperationTests(OperationTestBase):
                 "Author",
                 fields=[
                     ("id", models.AutoField(primary_key=True)),
-                    ("name", models.CharField(max_length=100)),
-                    ("surname", models.CharField(max_length=100, default="")),
-                    ("rebate", models.CharField(max_length=100)),
+                    ("name", models.CharField(max_length=100, default=" ")),
+                    ("surname", models.CharField(max_length=100, default=" ")),
+                    ("rebate", models.CharField(max_length=100, default="0%")),
                 ],
             ),
         ]
@@ -5389,6 +5395,7 @@ class OperationTests(OperationTestBase):
                 "test_alfk", editor, create_state, alter_state
             )
 
+    @skipUnlessDBFeature("supports_alter_column_to_serial")
     def test_alter_fk_non_fk(self):
         """
         Altering an FK to a non-FK works (#23244)
@@ -5923,7 +5930,7 @@ class OperationTests(OperationTestBase):
         add_hometown = migrations.AddField(
             "Author",
             "hometown",
-            models.CharField(max_length=100),
+            models.CharField(max_length=100, null=True),
         )
         create_old_man = migrations.RunPython(inner_method, inner_method)
 
@@ -6016,6 +6023,7 @@ class OperationTests(OperationTestBase):
             fill_data.state_forwards("fill_data", new_state)
             fill_data.database_forwards("fill_data", editor, project_state, new_state)
 
+    @skipUnlessDBFeature("supports_alter_column_to_serial")
     def _test_autofield_foreignfield_growth(
         self, source_field, target_field, target_value
     ):
@@ -6058,7 +6066,7 @@ class OperationTests(OperationTestBase):
                     models.ForeignKey(to="test_blog.Blog", on_delete=models.CASCADE),
                 ),
                 ("name", models.CharField(max_length=100)),
-                ("data", models.TextField(default="")),
+                ("data", models.TextField(default=" ")),
             ],
             options={},
         )

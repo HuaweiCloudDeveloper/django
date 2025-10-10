@@ -255,6 +255,7 @@ class ChangeListTests(TestCase):
             "Failed to find expected row element: %s" % table_output,
         )
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_result_list_empty_changelist_value_blank_string(self):
         new_child = Child.objects.create(name="", parent=None)
         request = self.factory.get("/child/")
@@ -517,6 +518,7 @@ class ChangeListTests(TestCase):
         cl.get_results(request)
         self.assertIsInstance(cl.paginator, CustomPaginator)
 
+    @skipUnlessDBFeature("supports_covering_indexes")
     def test_distinct_for_m2m_in_list_filter(self):
         """
         Regression test for #13902: When using a ManyToMany in list_filter,
@@ -714,6 +716,7 @@ class ChangeListTests(TestCase):
         cl.queryset.delete()
         self.assertEqual(cl.queryset.count(), 0)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_multiple_search_fields(self):
         """
         All rows containing each of the searched words are returned, where each
@@ -820,6 +823,7 @@ class ChangeListTests(TestCase):
             cl = m.get_changelist_instance(request)
             self.assertCountEqual(cl.queryset, [])
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_spanning_relations_with_custom_lookup_in_search_fields(self):
         hype = Group.objects.create(name="The Hype")
         concert = Concert.objects.create(name="Woodstock", group=hype)
@@ -1413,6 +1417,7 @@ class ChangeListTests(TestCase):
             lambda s: (s.speed, s.load),
         )
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_deterministic_order_for_model_ordered_by_its_manager(self):
         """
         The primary key is used in the ordering of the changelist's results to
@@ -1841,6 +1846,7 @@ class GetAdminLogTests(TestCase):
         # This template tag just logs.
         self.assertEqual(template.render(context), "")
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_no_user(self):
         """{% get_admin_log %} works without specifying a user."""
         user = User(username="jondoe", password="secret", email="super@example.com")
