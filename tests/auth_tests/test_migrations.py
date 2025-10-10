@@ -4,7 +4,7 @@ from django.apps import apps
 from django.contrib.auth.models import Permission, User
 from django.contrib.contenttypes.models import ContentType
 from django.db import connection, connections
-from django.test import TransactionTestCase
+from django.test import TransactionTestCase, skipUnlessDBFeature
 from django.test.utils import captured_stdout
 
 from .models import Proxy, UserProxy
@@ -57,6 +57,7 @@ class ProxyModelWithDifferentAppLabelTests(TransactionTestCase):
         self.custom_permission.refresh_from_db()
         self.assertEqual(self.custom_permission.content_type, proxy_model_content_type)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_user_has_now_proxy_model_permissions(self):
         user = User.objects.create()
         user.user_permissions.add(self.default_permission)
@@ -85,6 +86,7 @@ class ProxyModelWithDifferentAppLabelTests(TransactionTestCase):
             self.custom_permission.content_type, self.concrete_content_type
         )
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_user_keeps_same_permissions_after_migrating_backward(self):
         user = User.objects.create()
         user.user_permissions.add(self.default_permission)
@@ -145,6 +147,7 @@ class ProxyModelWithSameAppLabelTests(TransactionTestCase):
         self.assertEqual(self.default_permission.content_type, proxy_model_content_type)
         self.assertEqual(self.custom_permission.content_type, proxy_model_content_type)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_user_still_has_proxy_model_permissions(self):
         user = User.objects.create()
         user.user_permissions.add(self.default_permission)
@@ -171,6 +174,7 @@ class ProxyModelWithSameAppLabelTests(TransactionTestCase):
             self.custom_permission.content_type, self.concrete_content_type
         )
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_user_keeps_same_permissions_after_migrating_backward(self):
         user = User.objects.create()
         user.user_permissions.add(self.default_permission)

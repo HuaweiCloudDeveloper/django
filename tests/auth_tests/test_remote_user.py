@@ -12,6 +12,7 @@ from django.test import (
     TestCase,
     modify_settings,
     override_settings,
+    skipUnlessDBFeature,
 )
 from django.utils.deprecation import RemovedInDjango61Warning
 
@@ -70,6 +71,7 @@ class RemoteUserTest(TestCase):
         self.assertTrue(response.context["user"].is_anonymous)
         self.assertEqual(await User.objects.acount(), num_users)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_csrf_validation_passes_after_process_request_login(self):
         """
         CSRF check must access the CSRF token from the session or cookie,
@@ -99,6 +101,7 @@ class RemoteUserTest(TestCase):
         response = csrf_client.post("/remote_user/", data, **headers)
         self.assertEqual(response.status_code, 200)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     async def test_csrf_validation_passes_after_process_request_login_async(self):
         """See test_csrf_validation_passes_after_process_request_login."""
         csrf_client = AsyncClient(enforce_csrf_checks=True)
@@ -124,6 +127,7 @@ class RemoteUserTest(TestCase):
         response = await csrf_client.post("/remote_user/", data, **headers)
         self.assertEqual(response.status_code, 200)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_unknown_user(self):
         """
         Tests the case where the username passed in the header does not exist
@@ -139,6 +143,7 @@ class RemoteUserTest(TestCase):
         response = self.client.get("/remote_user/", **{self.header: "newuser"})
         self.assertEqual(User.objects.count(), num_users + 1)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     async def test_unknown_user_async(self):
         """See test_unknown_user."""
         num_users = await User.objects.acount()
@@ -155,6 +160,7 @@ class RemoteUserTest(TestCase):
         )
         self.assertEqual(await User.objects.acount(), num_users + 1)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_known_user(self):
         """
         Tests the case where the username passed in the header is a valid User.
@@ -171,6 +177,7 @@ class RemoteUserTest(TestCase):
         self.assertEqual(response.context["user"].username, "knownuser2")
         self.assertEqual(User.objects.count(), num_users)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     async def test_known_user_async(self):
         """See test_known_user."""
         await User.objects.acreate(username="knownuser")
@@ -189,6 +196,7 @@ class RemoteUserTest(TestCase):
         self.assertEqual(response.context["user"].username, "knownuser2")
         self.assertEqual(await User.objects.acount(), num_users)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_last_login(self):
         """
         A user's last_login is set the first time they make a
@@ -211,6 +219,7 @@ class RemoteUserTest(TestCase):
         response = self.client.get("/remote_user/", **{self.header: self.known_user})
         self.assertEqual(default_login, response.context["user"].last_login)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     async def test_last_login_async(self):
         """See test_last_login."""
         user = await User.objects.acreate(username="knownuser")
@@ -234,6 +243,7 @@ class RemoteUserTest(TestCase):
         )
         self.assertEqual(default_login, response.context["user"].last_login)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_header_disappears(self):
         """
         A logged in user is logged out automatically when
@@ -254,6 +264,7 @@ class RemoteUserTest(TestCase):
         response = self.client.get("/remote_user/")
         self.assertEqual(response.context["user"].username, "modeluser")
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     async def test_header_disappears_async(self):
         """See test_header_disappears."""
         await User.objects.acreate(username="knownuser")
@@ -273,6 +284,7 @@ class RemoteUserTest(TestCase):
         response = await self.async_client.get("/remote_user/")
         self.assertEqual(response.context["user"].username, "modeluser")
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_user_switch_forces_new_login(self):
         """
         If the username in the header changes between requests
@@ -289,6 +301,7 @@ class RemoteUserTest(TestCase):
         # In backends that do not create new users, it is '' (anonymous user)
         self.assertNotEqual(response.context["user"].username, "knownuser")
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     async def test_user_switch_forces_new_login_async(self):
         """See test_user_switch_forces_new_login."""
         await User.objects.acreate(username="knownuser")
@@ -306,11 +319,13 @@ class RemoteUserTest(TestCase):
         # In backends that do not create new users, it is '' (anonymous user)
         self.assertNotEqual(response.context["user"].username, "knownuser")
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_inactive_user(self):
         User.objects.create(username="knownuser", is_active=False)
         response = self.client.get("/remote_user/", **{self.header: "knownuser"})
         self.assertTrue(response.context["user"].is_anonymous)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     async def test_inactive_user_async(self):
         await User.objects.acreate(username="knownuser", is_active=False)
         response = await self.async_client.get(
@@ -333,12 +348,14 @@ class RemoteUserNoCreateTest(RemoteUserTest):
 
     backend = "auth_tests.test_remote_user.RemoteUserNoCreateBackend"
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_unknown_user(self):
         num_users = User.objects.count()
         response = self.client.get("/remote_user/", **{self.header: "newuser"})
         self.assertTrue(response.context["user"].is_anonymous)
         self.assertEqual(User.objects.count(), num_users)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     async def test_unknown_user_async(self):
         num_users = await User.objects.acount()
         response = await self.async_client.get(
@@ -353,11 +370,13 @@ class AllowAllUsersRemoteUserBackendTest(RemoteUserTest):
 
     backend = "django.contrib.auth.backends.AllowAllUsersRemoteUserBackend"
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_inactive_user(self):
         user = User.objects.create(username="knownuser", is_active=False)
         response = self.client.get("/remote_user/", **{self.header: self.known_user})
         self.assertEqual(response.context["user"].username, user.username)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     async def test_inactive_user_async(self):
         user = await User.objects.acreate(username="knownuser", is_active=False)
         response = await self.async_client.get(
@@ -414,6 +433,7 @@ class RemoteUserCustomTest(RemoteUserTest):
         self.assertEqual(knownuser.last_name, "knownuser")
         self.assertEqual(knownuser2.last_name, "knownuser2")
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_unknown_user(self):
         """
         The unknown user created should be configured with an email address
@@ -462,6 +482,7 @@ class PersistentRemoteUserTest(RemoteUserTest):
     middleware = "django.contrib.auth.middleware.PersistentRemoteUserMiddleware"
     require_header = False
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_header_disappears(self):
         """
         A logged in user is kept logged in even if the REMOTE_USER header
@@ -476,6 +497,7 @@ class PersistentRemoteUserTest(RemoteUserTest):
         self.assertFalse(response.context["user"].is_anonymous)
         self.assertEqual(response.context["user"].username, "knownuser")
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     async def test_header_disappears_async(self):
         """See test_header_disappears."""
         await User.objects.acreate(username="knownuser")

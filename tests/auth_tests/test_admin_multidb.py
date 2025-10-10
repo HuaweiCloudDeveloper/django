@@ -3,7 +3,7 @@ from unittest import mock
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
-from django.test import TestCase, override_settings
+from django.test import TestCase, override_settings, skipUnlessDBFeature
 from django.urls import path, reverse
 
 
@@ -48,6 +48,7 @@ class MultiDatabaseTests(TestCase):
         Router.target_db = None
 
     @mock.patch("django.contrib.auth.admin.transaction")
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_add_view(self, mock):
         for db in self.databases:
             with self.subTest(db_connection=db):

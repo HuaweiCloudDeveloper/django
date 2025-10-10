@@ -10,7 +10,7 @@ from django.contrib.auth.decorators import (
 )
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
-from django.test import TestCase, override_settings
+from django.test import TestCase, override_settings, skipUnlessDBFeature
 from django.test.client import RequestFactory
 
 from .test_views import AuthViewsTestCase
@@ -154,6 +154,7 @@ class PermissionsRequiredDecoratorTest(TestCase):
     factory = RequestFactory()
 
     @classmethod
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def setUpTestData(cls):
         cls.user = models.User.objects.create(username="joe", password="qwerty")
         # Add permissions auth.add_customuser and auth.change_customuser
@@ -319,6 +320,7 @@ class UserPassesTestDecoratorTest(TestCase):
     factory = RequestFactory()
 
     @classmethod
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def setUpTestData(cls):
         cls.user_pass = models.User.objects.create(username="joe", password="qwerty")
         cls.user_deny = models.User.objects.create(username="jim", password="qwerty")

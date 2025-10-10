@@ -56,6 +56,7 @@ from .models import (
 
 class NonAggregateAnnotationTestCase(TestCase):
     @classmethod
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def setUpTestData(cls):
         cls.a1 = Author.objects.create(name="Adrian Holovaty", age=34)
         cls.a2 = Author.objects.create(name="Jacob Kaplan-Moss", age=35)

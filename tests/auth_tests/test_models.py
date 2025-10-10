@@ -17,7 +17,7 @@ from django.core import mail
 from django.db import connection, migrations
 from django.db.migrations.state import ModelState, ProjectState
 from django.db.models.signals import post_save
-from django.test import SimpleTestCase, TestCase, TransactionTestCase, override_settings
+from django.test import SimpleTestCase, TestCase, TransactionTestCase, override_settings, skipUnlessDBFeature
 
 from .models import CustomEmailField, IntegerUsernameUser
 
@@ -275,6 +275,7 @@ class AbstractUserTestCase(TestCase):
         self.assertEqual(message.from_email, "from@domain.com")
         self.assertEqual(message.to, [user.email])
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_last_login_default(self):
         user1 = User.objects.create(username="user1")
         self.assertIsNone(user1.last_login)
@@ -513,6 +514,7 @@ class IsActiveTestCase(TestCase):
     Tests the behavior of the guaranteed is_active attribute
     """
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_builtin_user_isactive(self):
         user = User.objects.create(username="foo", email="foo@bar.com")
         # is_active is true by default
@@ -524,6 +526,7 @@ class IsActiveTestCase(TestCase):
         self.assertFalse(user_fetched.is_active)
 
     @override_settings(AUTH_USER_MODEL="auth_tests.IsActiveTestUser1")
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_is_active_field_default(self):
         """
         tests that the default value for is_active is provided
