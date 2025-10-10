@@ -7,7 +7,7 @@ from django.core import mail
 from django.db import connection
 from django.template.loader import render_to_string
 from django.template.response import TemplateResponse
-from django.test import TestCase, override_settings
+from django.test import TestCase, override_settings, skipUnlessDBFeature
 from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 
@@ -54,6 +54,7 @@ class AdminActionsTest(TestCase):
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].subject, "Greetings from a ModelAdmin action")
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_model_admin_default_delete_action(self):
         action_data = {
             ACTION_CHECKBOX_NAME: [self.s1.pk, self.s2.pk],
@@ -111,6 +112,7 @@ class AdminActionsTest(TestCase):
         self.assertContains(response, "<ul></ul>", html=True)
 
     @override_settings(USE_THOUSAND_SEPARATOR=True, NUMBER_GROUPING=3)
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_non_localized_pk(self):
         """
         If USE_THOUSAND_SEPARATOR is set, the ids for the objects selected for
@@ -193,6 +195,7 @@ class AdminActionsTest(TestCase):
             response, "<li>Unchangeable object: %s</li>" % obj, 1, html=True
         )
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_delete_queryset_hook(self):
         delete_confirmation_data = {
             ACTION_CHECKBOX_NAME: [self.s1.pk, self.s2.pk],
@@ -457,6 +460,7 @@ action)</option>
         )
         self.assertTemplateUsed(response, "admin/popup_response.html")
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_popup_template_response_on_delete(self):
         instance = Actor.objects.create(name="David Tennant", age=45)
         response = self.client.post(

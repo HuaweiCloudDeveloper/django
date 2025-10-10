@@ -4,7 +4,7 @@ from django.contrib import admin
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.http import HttpResponse
-from django.test import TestCase, override_settings
+from django.test import TestCase, override_settings, skipUnlessDBFeature
 from django.urls import path, reverse
 
 from .models import Book
@@ -131,6 +131,7 @@ class MultiDatabaseTests(TestCase):
                     mock.atomic.assert_not_called()
 
     @mock.patch("django.contrib.admin.options.transaction")
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_delete_view(self, mock):
         for db in self.databases:
             with self.subTest(db=db):
