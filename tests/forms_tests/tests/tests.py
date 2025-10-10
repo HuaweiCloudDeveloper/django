@@ -246,6 +246,7 @@ class ModelFormCallableModelDefault(TestCase):
 
 
 class FormsModelTestCase(TestCase):
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_unicode_filename(self):
         # FileModel with Unicode filename and data #########################
         file1 = SimpleUploadedFile(
@@ -433,6 +434,7 @@ class EmptyLabelTestCase(TestCase):
             """,
         )
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_save_empty_label_forms(self):
         # Saving a form with a blank choice results in the expected
         # value being stored in the database.
@@ -468,6 +470,7 @@ class EmptyLabelTestCase(TestCase):
             """,
         )
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_get_display_value_on_none(self):
         m = ChoiceModel.objects.create(name="test", choice="", choice_integer=None)
         self.assertIsNone(m.choice_integer)

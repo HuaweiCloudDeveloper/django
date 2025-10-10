@@ -26,6 +26,7 @@ from .models import (
 
 class GetOrCreateTests(TestCase):
     @classmethod
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def setUpTestData(cls):
         Person.objects.create(
             first_name="John", last_name="Lennon", birthday=date(1940, 10, 9)
@@ -292,6 +293,7 @@ class GetOrCreateThroughManyToMany(TestCase):
 
 
 class UpdateOrCreateTests(TestCase):
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_update(self):
         Person.objects.create(
             first_name="John", last_name="Lennon", birthday=date(1940, 10, 9)
@@ -317,6 +319,7 @@ class UpdateOrCreateTests(TestCase):
         self.assertEqual(p.last_name, "Lennon")
         self.assertEqual(p.birthday, date(1940, 10, 10))
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_create_twice(self):
         p, created = Person.objects.update_or_create(
             first_name="John",
@@ -355,6 +358,7 @@ class UpdateOrCreateTests(TestCase):
             ManualPrimaryKeyTest.objects.update_or_create(id=1, data="Different")
         self.assertEqual(ManualPrimaryKeyTest.objects.get(id=1).data, "Original")
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_with_pk_property(self):
         """
         Using the pk property of a model is allowed.
@@ -466,6 +470,7 @@ class UpdateOrCreateTests(TestCase):
         self.assertEqual(book.name, name)
         self.assertEqual(author.books.count(), 1)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_defaults_exact(self):
         """
         If you have a field named defaults and want to use it as an exact
@@ -494,6 +499,7 @@ class UpdateOrCreateTests(TestCase):
         self.assertFalse(created)
         self.assertEqual(obj.defaults, "another testing")
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_create_defaults_exact(self):
         """
         If you have a field named create_defaults and want to use it as an
@@ -522,6 +528,7 @@ class UpdateOrCreateTests(TestCase):
         self.assertIs(created, False)
         self.assertEqual(obj.create_defaults, "testing")
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_create_callable_default(self):
         obj, created = Person.objects.update_or_create(
             first_name="George",
@@ -531,6 +538,7 @@ class UpdateOrCreateTests(TestCase):
         self.assertIs(created, True)
         self.assertEqual(obj.birthday, date(1943, 2, 25))
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_create_callable_create_defaults(self):
         obj, created = Person.objects.update_or_create(
             first_name="George",
@@ -541,6 +549,7 @@ class UpdateOrCreateTests(TestCase):
         self.assertIs(created, True)
         self.assertEqual(obj.birthday, date(1943, 2, 25))
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_update_callable_default(self):
         Person.objects.update_or_create(
             first_name="George",
@@ -554,6 +563,7 @@ class UpdateOrCreateTests(TestCase):
         self.assertIs(created, False)
         self.assertEqual(obj.last_name, "NotHarrison")
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_defaults_not_evaluated_unless_needed(self):
         """`defaults` aren't evaluated if the instance isn't created."""
         Person.objects.create(
@@ -621,6 +631,7 @@ class UpdateOrCreateTransactionTests(TransactionTestCase):
 
     @skipUnlessDBFeature("has_select_for_update")
     @skipUnlessDBFeature("supports_transactions")
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_updates_in_transaction(self):
         """
         Objects are selected and updated in a transaction to avoid race
@@ -677,6 +688,7 @@ class UpdateOrCreateTransactionTests(TransactionTestCase):
 
     @skipUnlessDBFeature("has_select_for_update")
     @skipUnlessDBFeature("supports_transactions")
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_creation_in_transaction(self):
         """
         Objects are selected and updated in a transaction to avoid race

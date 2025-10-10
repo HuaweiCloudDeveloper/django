@@ -1,7 +1,7 @@
 import datetime
 
 from django.core.exceptions import ImproperlyConfigured
-from django.test import TestCase, override_settings
+from django.test import TestCase, override_settings, skipUnlessDBFeature
 from django.views.generic.base import View
 
 from .models import Artist, Author, Book, Page
@@ -233,6 +233,7 @@ class ListViewTests(TestCase):
         with self.assertNumQueries(3):
             self.client.get("/list/authors/notempty/paginated/")
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_explicitly_ordered_list_view(self):
         Book.objects.create(
             name="Zebras for Dummies", pages=800, pubdate=datetime.date(2006, 9, 1)

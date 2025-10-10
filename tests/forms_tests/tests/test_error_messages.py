@@ -23,7 +23,7 @@ from django.forms import (
     utils,
 )
 from django.template import Context, Template
-from django.test import SimpleTestCase, TestCase, ignore_warnings
+from django.test import SimpleTestCase, TestCase, ignore_warnings, skipUnlessDBFeature
 from django.utils.deprecation import RemovedInDjango60Warning
 from django.utils.safestring import mark_safe
 
@@ -310,6 +310,7 @@ class FormsErrorMessagesTestCase(SimpleTestCase, AssertFormErrorsMixin):
 
 
 class ModelChoiceFieldErrorMessagesTestCase(TestCase, AssertFormErrorsMixin):
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_modelchoicefield(self):
         # Create choices for the model choice field tests below.
         ChoiceModel.objects.create(pk=1, name="a")
