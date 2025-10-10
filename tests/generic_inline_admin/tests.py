@@ -32,6 +32,7 @@ class TestDataMixin:
 @ignore_warnings(category=RemovedInDjango60Warning)
 @override_settings(ROOT_URLCONF="generic_inline_admin.urls")
 class GenericAdminViewTest(TestDataMixin, TestCase):
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def setUp(self):
         self.client.force_login(self.superuser)
 

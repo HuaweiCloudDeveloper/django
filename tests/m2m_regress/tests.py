@@ -1,5 +1,5 @@
 from django.core.exceptions import FieldError
-from django.test import TestCase
+from django.test import TestCase, skipUnlessDBFeature
 
 from .models import (
     Entry,
@@ -99,6 +99,7 @@ class M2MRegressionTests(TestCase):
         self.assertCountEqual(c1.tags.all(), [t1, t2])
         self.assertCountEqual(t1.tag_collections.all(), [c1])
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_manager_class_caching(self):
         e1 = Entry.objects.create()
         e2 = Entry.objects.create()

@@ -308,6 +308,7 @@ class UpdateOrCreateTests(TestCase):
         self.assertEqual(p.last_name, "Lennon")
         self.assertEqual(p.birthday, date(1940, 10, 10))
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_create(self):
         p, created = Person.objects.update_or_create(
             first_name="John",

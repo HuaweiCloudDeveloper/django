@@ -2,7 +2,7 @@ from datetime import date, datetime, timedelta
 from operator import attrgetter
 
 from django.db import IntegrityError
-from django.test import TestCase
+from django.test import TestCase, skipUnlessDBFeature
 
 from .models import (
     CustomMembership,
@@ -456,6 +456,7 @@ class M2mThroughReferentialTests(TestCase):
         )
         self.assertSequenceEqual(chris.sym_friends.all(), [tony])
 
+    @skipUnlessDBFeature("supports_date_cast")
     def test_add_on_symmetrical_m2m_with_intermediate_model(self):
         tony = PersonSelfRefM2M.objects.create(name="Tony")
         chris = PersonSelfRefM2M.objects.create(name="Chris")
@@ -466,6 +467,7 @@ class M2mThroughReferentialTests(TestCase):
         friendship = tony.symmetricalfriendship_set.get()
         self.assertEqual(friendship.date_friended, date_friended)
 
+    @skipUnlessDBFeature("supports_date_cast")
     def test_set_on_symmetrical_m2m_with_intermediate_model(self):
         tony = PersonSelfRefM2M.objects.create(name="Tony")
         chris = PersonSelfRefM2M.objects.create(name="Chris")

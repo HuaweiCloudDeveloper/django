@@ -205,6 +205,7 @@ class LookupTests(TestCase):
         with self.assertRaises(TypeError):
             Article.objects.in_bulk(headline__startswith="Blah")
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_in_bulk_lots_of_ids(self):
         test_range = 2000
         max_query_params = connection.features.max_query_params
