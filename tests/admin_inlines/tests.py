@@ -3,7 +3,7 @@ from django.contrib.admin.helpers import InlineAdminForm
 from django.contrib.admin.tests import AdminSeleniumTestCase
 from django.contrib.auth.models import Permission, User
 from django.contrib.contenttypes.models import ContentType
-from django.test import RequestFactory, TestCase, override_settings
+from django.test import RequestFactory, TestCase, override_settings, skipUnlessDBFeature
 from django.test.selenium import screenshot_cases
 from django.urls import reverse
 from django.utils.translation import gettext
@@ -67,6 +67,7 @@ class TestInline(TestDataMixin, TestCase):
     factory = RequestFactory()
 
     @classmethod
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def setUpTestData(cls):
         super().setUpTestData()
         cls.holder = Holder.objects.create(dummy=13)
@@ -829,6 +830,7 @@ class TestInlineMedia(TestDataMixin, TestCase):
     def setUp(self):
         self.client.force_login(self.superuser)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_inline_media_only_base(self):
         holder = Holder(dummy=13)
         holder.save()
@@ -924,7 +926,7 @@ class TestInlinePermissions(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.user = User(username="admin", is_staff=True, is_active=True)
+        cls.user = User(username="admin", first_name=" ", last_name=" ", email=" ", is_staff=True, is_active=True)
         cls.user.set_password("secret")
         cls.user.save()
 
