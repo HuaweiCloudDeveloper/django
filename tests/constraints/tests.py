@@ -375,7 +375,7 @@ class CheckConstraintTests(TestCase):
 
     @skipUnlessDBFeature("supports_json_field")
     def test_validate_jsonfield_exact(self):
-        data = {"release": "5.0.2", "version": "stable"}
+        # data = {"release": "5.0.2", "version": "stable"}
         json_exact_constraint = models.CheckConstraint(
             condition=models.Q(data__version="stable"),
             name="only_stable_version",
@@ -386,6 +386,7 @@ class CheckConstraintTests(TestCase):
         msg = f"Constraint “{json_exact_constraint.name}” is violated."
         with self.assertRaisesMessage(ValidationError, msg):
             json_exact_constraint.validate(JSONFieldModel, JSONFieldModel(data=data))
+
 
     @skipUnlessDBFeature("supports_stored_generated_columns")
     def test_validate_generated_field_stored(self):
@@ -427,6 +428,7 @@ class CheckConstraintTests(TestCase):
             self.assertIs(constraint.check, other_condition)
         self.assertEqual(ctx.filename, __file__)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_database_default(self):
         models.CheckConstraint(
             condition=models.Q(field_with_db_default="field_with_db_default"),
@@ -1477,6 +1479,7 @@ class UniqueConstraintTests(TestCase):
         with self.assertRaisesMessage(ValueError, msg):
             models.UniqueConstraint(fields=["field"])
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_database_default(self):
         models.UniqueConstraint(
             fields=["field_with_db_default"], name="unique_field_with_db_default"

@@ -4,7 +4,7 @@ from django.apps.registry import Apps, apps
 from django.contrib.contenttypes import management as contenttypes_management
 from django.contrib.contenttypes.models import ContentType
 from django.core.management import call_command
-from django.test import TestCase, modify_settings
+from django.test import TestCase, modify_settings, skipUnlessDBFeature
 from django.test.utils import captured_stdout
 
 from .models import ModelWithNullFKToSite, Post
@@ -37,6 +37,7 @@ class RemoveStaleContentTypesTests(TestCase):
     def setUp(self):
         self.app_config = apps.get_app_config("contenttypes_tests")
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_interactive_true_with_dependent_objects(self):
         """
         interactive mode (the default) deletes stale content types and warns of
