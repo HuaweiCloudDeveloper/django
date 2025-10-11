@@ -1,5 +1,5 @@
 from django.db import IntegrityError, connection, transaction
-from django.test import TestCase
+from django.test import TestCase, skipUnlessDBFeature
 from django.utils.deprecation import RemovedInDjango60Warning
 
 from .models import (
@@ -306,6 +306,7 @@ class OneToOneTests(TestCase):
         self.assertIsNot(r.place, p)
         self.assertEqual(r.place, p)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_filter_one_to_one_relations(self):
         """
         Regression test for #9968
@@ -327,6 +328,7 @@ class OneToOneTests(TestCase):
         self.assertEqual(num_deleted, 1)
         self.assertEqual(objs, {"one_to_one.Pointer": 1})
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_save_nullable_o2o_after_parent(self):
         place = Place(name="Rose tattoo")
         bar = UndergroundBar(place=place)
@@ -553,6 +555,7 @@ class OneToOneTests(TestCase):
         self.assertFalse(hasattr(Director(), "director"))
         self.assertFalse(hasattr(School(), "school"))
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_update_one_to_one_pk(self):
         p1 = Place.objects.create()
         p2 = Place.objects.create()

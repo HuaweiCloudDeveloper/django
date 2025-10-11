@@ -52,6 +52,7 @@ class ModelTests(TestCase):
         # this line will raise an AttributeError without the accompanying fix
         query.get_compiler(using=db).as_sql()
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_empty_choice(self):
         # NOTE: Part of the regression test here is merely parsing the model
         # declaration. The verbose_name, in particular, did not always work.
@@ -65,6 +66,7 @@ class ModelTests(TestCase):
         a = Article.objects.get(pk=a.pk)
         self.assertEqual(a.misc_data, "")
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_long_textfield(self):
         # TextFields can hold more than 4000 characters (this was broken in
         # Oracle).
@@ -76,6 +78,7 @@ class ModelTests(TestCase):
         a = Article.objects.get(pk=a.pk)
         self.assertEqual(len(a.article_text), 5000)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_long_unicode_textfield(self):
         # TextFields can hold more than 4000 bytes also when they are
         # less than 4000 characters
@@ -87,6 +90,7 @@ class ModelTests(TestCase):
         a = Article.objects.get(pk=a.pk)
         self.assertEqual(len(a.article_text), 3000)
 
+    @skipUnlessDBFeature("supports_timezones")
     def test_date_lookup(self):
         # Regression test for #659
         Party.objects.create(when=datetime.datetime(1999, 12, 31))
@@ -158,6 +162,7 @@ class ModelTests(TestCase):
             attrgetter("when"),
         )
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_date_filter_null(self):
         # Date filtering was failing with NULL date values in SQLite
         # (regression test for #3501, among other things).
@@ -199,6 +204,7 @@ class ModelTests(TestCase):
         self.assertEqual(str(w), "Full-time")
 
     @skipUnlessDBFeature("supports_timezones")
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_timezones(self):
         # Saving and updating with timezone-aware datetime Python objects.
         # Regression test for #10443.

@@ -19,7 +19,7 @@ from django.contrib.admin.widgets import (
 from django.contrib.auth.models import User
 from django.db import models
 from django.forms.widgets import Select
-from django.test import RequestFactory, SimpleTestCase, TestCase
+from django.test import RequestFactory, SimpleTestCase, TestCase, skipUnlessDBFeature
 from django.test.utils import isolate_apps
 from django.utils.deprecation import RemovedInDjango60Warning
 
@@ -41,6 +41,7 @@ request.user = MockSuperUser()
 
 class ModelAdminTests(TestCase):
     @classmethod
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def setUpTestData(cls):
         cls.band = Band.objects.create(
             name="The Doors",

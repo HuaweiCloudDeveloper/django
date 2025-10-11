@@ -6,7 +6,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.core.files import File
 from django.core.files.images import ImageFile
 from django.db.models import signals
-from django.test import TestCase
+from django.test import TestCase, skipUnlessDBFeature
 from django.test.testcases import SerializeMixin
 
 try:
@@ -376,6 +376,7 @@ class TwoImageFieldTests(ImageFieldTestMixin, TestCase):
 
     PersonModel = PersonTwoImages
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_constructor(self):
         p = self.PersonModel(mugshot=self.file1, headshot=self.file2)
         self.check_dimensions(p, 4, 8, "mugshot")
@@ -384,6 +385,7 @@ class TwoImageFieldTests(ImageFieldTestMixin, TestCase):
         self.check_dimensions(p, 4, 8, "mugshot")
         self.check_dimensions(p, 8, 4, "headshot")
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_create(self):
         p = self.PersonModel.objects.create(mugshot=self.file1, headshot=self.file2)
         self.check_dimensions(p, 4, 8)
