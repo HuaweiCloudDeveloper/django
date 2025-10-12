@@ -1614,6 +1614,7 @@ class Queries4Tests(TestCase):
         qs2 = otherteachers.filter(schools=s1).filter(schools=s3)
         self.assertSequenceEqual(qs1 | qs2, [])
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_ticket7095(self):
         # Updates that are filtered on the model being updated are somewhat
         # tricky in MySQL.
@@ -3491,6 +3492,7 @@ class NullInExcludeTest(TestCase):
         NullableName.objects.create(name="i1")
         NullableName.objects.create()
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_null_in_exclude_qs(self):
         none_val = "" if connection.features.interprets_empty_strings_as_nulls else None
         self.assertQuerySetEqual(

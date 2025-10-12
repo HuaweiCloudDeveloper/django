@@ -10,7 +10,7 @@ from django.core import management
 from django.db import DEFAULT_DB_ALIAS, router, transaction
 from django.db.models import signals
 from django.db.utils import ConnectionRouter
-from django.test import SimpleTestCase, TestCase, override_settings
+from django.test import SimpleTestCase, TestCase, override_settings, skipUnlessDBFeature
 
 from .models import Book, Person, Pet, Review, UserProfile
 from .routers import AuthRouter, TestRouter, WriteRouter
@@ -115,6 +115,7 @@ class QueryTestCase(TestCase):
             book.refresh_from_db()
         router.db_for_read.assert_called_once_with(Book, instance=book)
 
+    @skipUnlessDBFeature("supports_datefield_without_time")
     def test_basic_queries(self):
         "Queries are constrained to a single database"
         dive = Book.objects.using("other").create(
@@ -1916,6 +1917,7 @@ class RouterTestCase(TestCase):
         # If you evaluate the query, it should work, running on 'other'
         self.assertEqual(list(qs.values_list("title", flat=True)), ["Dive into Python"])
 
+    @skipUnlessDBFeature("supports_datefield_without_time")
     def test_deferred_models(self):
         mark_def = Person.objects.using("default").create(name="Mark Pilgrim")
         mark_other = Person.objects.using("other").create(name="Mark Pilgrim")

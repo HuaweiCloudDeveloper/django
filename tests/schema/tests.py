@@ -686,6 +686,7 @@ class SchemaTests(TransactionTestCase):
             editor.remove_field(Tag, Tag._meta.get_field("slug"))
         self.assertEqual(editor.deferred_sql, [])
 
+    @skipUnlessDBFeature("requires_literal_defaults")
     def test_add_field_temp_default(self):
         """
         Tests adding fields to models with a temporary default
@@ -714,6 +715,7 @@ class SchemaTests(TransactionTestCase):
             connection.features.interprets_empty_strings_as_nulls,
         )
 
+    @skipUnlessDBFeature("requires_literal_defaults")
     def test_add_field_temp_default_boolean(self):
         """
         Tests adding fields to models with a temporary default where
@@ -740,6 +742,7 @@ class SchemaTests(TransactionTestCase):
             field_type, connection.features.introspected_field_types["BooleanField"]
         )
 
+    @skipUnlessDBFeature("requires_literal_defaults")
     def test_add_field_default_transform(self):
         """
         Tests adding fields to models with a default that is not directly
@@ -788,6 +791,7 @@ class SchemaTests(TransactionTestCase):
         self.assertIn("note_id", columns)
         self.assertTrue(columns["note_id"][1][6])
 
+    @skipUnlessDBFeature("requires_literal_defaults")
     def test_add_field_binary(self):
         """
         Tests binary fields get a sane default (#22851)
@@ -805,6 +809,7 @@ class SchemaTests(TransactionTestCase):
         # these two types.
         self.assertIn(columns["bits"][0], ("BinaryField", "TextField"))
 
+    @skipUnlessDBFeature("requires_literal_defaults")
     def test_add_field_durationfield_with_default(self):
         with connection.schema_editor() as editor:
             editor.create_model(Author)
@@ -962,6 +967,7 @@ class SchemaTests(TransactionTestCase):
         )
 
     @isolate_apps("schema")
+    @skipUnlessDBFeature("supports_alter_column_to_serial")
     def test_add_auto_field(self):
         class AddAutoFieldModel(Model):
             name = CharField(max_length=255, primary_key=True)
@@ -1152,6 +1158,7 @@ class SchemaTests(TransactionTestCase):
         with connection.schema_editor() as editor:
             editor.alter_field(Note, old_field, new_field, strict=True)
 
+    @skipUnlessDBFeature("requires_literal_defaults")
     def test_alter_text_field_to_not_null_with_default_value(self):
         with connection.schema_editor() as editor:
             editor.create_model(Note)
@@ -1227,7 +1234,8 @@ class SchemaTests(TransactionTestCase):
             editor.alter_field(Note, old_field, new_field, strict=True)
         # Make sure the field isn't nullable
         columns = self.column_classes(Note)
-        self.assertFalse(columns["info"][1][6])
+        info_nullable = columns["info"][1][6]
+        self.assertFalse(info_nullable)
 
     def test_alter_text_field_to_datetime_field(self):
         """
@@ -1279,6 +1287,7 @@ class SchemaTests(TransactionTestCase):
             Note.objects.create(info=None)
 
     @skipUnlessDBFeature("interprets_empty_strings_as_nulls")
+    @skipUnlessDBFeature("requires_literal_defaults")
     def test_alter_textual_field_not_null_to_null(self):
         """
         Nullability for textual fields is preserved on databases that
@@ -1315,6 +1324,7 @@ class SchemaTests(TransactionTestCase):
         with self.assertRaises(IntegrityError):
             UniqueTest.objects.create(year=None, slug="bbb")
 
+    @skipUnlessDBFeature("requires_literal_defaults")
     def test_alter_null_to_not_null(self):
         """
         #23609 - Tests handling of default values when altering from NULL to NOT NULL.
@@ -2351,6 +2361,7 @@ class SchemaTests(TransactionTestCase):
             NoteRename.objects.create(detail_info=None)
 
     @isolate_apps("schema")
+    @skipUnlessDBFeature("requires_literal_defaults")
     def test_rename_keep_db_default(self):
         """Renaming a field shouldn't affect a database default."""
 
@@ -2376,6 +2387,7 @@ class SchemaTests(TransactionTestCase):
         self.assertEqual(columns["renamed_year"][1].default, "1985")
 
     @isolate_apps("schema")
+    @skipUnlessDBFeature("requires_literal_defaults")
     def test_add_field_both_defaults_preserves_db_default(self):
         class Author(Model):
             class Meta:
@@ -2393,6 +2405,7 @@ class SchemaTests(TransactionTestCase):
         self.assertEqual(columns["birth_year"][1].default, "1988")
 
     @isolate_apps("schema")
+    @skipUnlessDBFeature("requires_literal_defaults")
     def test_add_text_field_with_db_default(self):
         class Author(Model):
             description = TextField(db_default="(missing)")
@@ -2406,6 +2419,7 @@ class SchemaTests(TransactionTestCase):
         self.assertIn("(missing)", columns["description"][1].default)
 
     @isolate_apps("schema")
+    @skipUnlessDBFeature("requires_literal_defaults")
     def test_db_default_equivalent_sql_noop(self):
         class Author(Model):
             name = TextField(db_default=Value("foo"))
@@ -2423,6 +2437,7 @@ class SchemaTests(TransactionTestCase):
             editor.alter_field(Author, Author._meta.get_field("name"), new_field)
 
     @isolate_apps("schema")
+    @skipUnlessDBFeature("requires_literal_defaults")
     def test_db_default_output_field_resolving(self):
         class Author(Model):
             data = JSONField(
@@ -2828,6 +2843,7 @@ class SchemaTests(TransactionTestCase):
     @skipUnlessDBFeature(
         "supports_column_check_constraints", "can_introspect_check_constraints"
     )
+    @skipUnlessDBFeature("requires_literal_defaults")
     def test_check_constraints(self):
         """
         Tests creating/deleting CHECK constraints
@@ -2985,6 +3001,7 @@ class SchemaTests(TransactionTestCase):
             Author._meta.constraints = []
             editor.remove_constraint(Author, constraint)
 
+    @skipUnlessDBFeature("supports_nulls_distinct_unique_constraints")
     def test_unique(self):
         """
         Tests removing and adding unique constraints to a single column.
@@ -3113,6 +3130,7 @@ class SchemaTests(TransactionTestCase):
         with self.assertRaises(IntegrityError):
             Tag.objects.create(title="bar", slug="foo")
 
+    @skipUnlessDBFeature("supports_partial_indexes")
     def test_remove_ignored_unique_constraint_not_create_fk_index(self):
         with connection.schema_editor() as editor:
             editor.create_model(Author)
@@ -4328,7 +4346,7 @@ class SchemaTests(TransactionTestCase):
             editor.remove_index(JSONModel, index)
         self.assertNotIn(index.name, self.get_constraints(table))
 
-    @skipIfDBFeature("supports_expression_indexes")
+    @skipUnlessDBFeature("supports_expression_indexes")
     def test_func_index_unsupported(self):
         # Index is ignored on databases that don't support indexes on
         # expressions.
@@ -4527,6 +4545,7 @@ class SchemaTests(TransactionTestCase):
         with self.assertRaises(DatabaseError):
             list(Thing.objects.all())
 
+    @skipUnlessDBFeature("supports_column_check_constraints")
     def test_remove_constraints_capital_letters(self):
         """
         #23065 - Constraint names must be quoted if they contain capital letters.
@@ -4608,6 +4627,7 @@ class SchemaTests(TransactionTestCase):
                     expected_constraint_name, self.get_constraints(model._meta.db_table)
                 )
 
+    @skipUnlessDBFeature("requires_literal_defaults")
     def test_add_field_use_effective_default(self):
         """
         #23987 - effective_default() should be used as the field default when
@@ -4635,6 +4655,7 @@ class SchemaTests(TransactionTestCase):
                 None if connection.features.interprets_empty_strings_as_nulls else "",
             )
 
+    @skipUnlessDBFeature("requires_literal_defaults")
     def test_add_field_default_dropped(self):
         # Create the table
         with connection.schema_editor() as editor:
@@ -4665,6 +4686,7 @@ class SchemaTests(TransactionTestCase):
             if connection.features.can_introspect_default:
                 self.assertIsNone(field.default)
 
+    @skipUnlessDBFeature("requires_literal_defaults")
     def test_add_field_default_nullable(self):
         with connection.schema_editor() as editor:
             editor.create_model(Author)
@@ -4692,6 +4714,7 @@ class SchemaTests(TransactionTestCase):
             if connection.features.can_introspect_default:
                 self.assertIn(field.default, ["NULL", None])
 
+    @skipUnlessDBFeature("requires_literal_defaults")
     def test_add_textfield_default_nullable(self):
         with connection.schema_editor() as editor:
             editor.create_model(Author)
@@ -4719,6 +4742,7 @@ class SchemaTests(TransactionTestCase):
             if connection.features.can_introspect_default:
                 self.assertIn(field.default, ["NULL", None])
 
+    @skipUnlessDBFeature("requires_literal_defaults")
     def test_alter_field_default_dropped(self):
         # Create the table
         with connection.schema_editor() as editor:
@@ -4804,6 +4828,7 @@ class SchemaTests(TransactionTestCase):
         with connection.schema_editor() as editor, self.assertNumQueries(0):
             editor.alter_field(Author, new_field, old_field, strict=True)
 
+    @skipUnlessDBFeature("requires_literal_defaults")
     def test_add_textfield_unhashable_default(self):
         # Create the table
         with connection.schema_editor() as editor:
@@ -4862,6 +4887,7 @@ class SchemaTests(TransactionTestCase):
         )
 
     @skipUnlessDBFeature("supports_comments")
+    @skipUnlessDBFeature("requires_literal_defaults")
     def test_add_db_comment_and_default_charfield(self):
         comment = "Custom comment with default"
         field = CharField(max_length=255, default="Joe Doe", db_comment=comment)
@@ -5306,6 +5332,7 @@ class SchemaTests(TransactionTestCase):
 
     @mock.patch("django.db.backends.base.schema.datetime")
     @mock.patch("django.db.backends.base.schema.timezone")
+    @skipUnlessDBFeature("requires_literal_defaults")
     def test_add_datefield_and_datetimefield_use_effective_default(
         self, mocked_datetime, mocked_tz
     ):
