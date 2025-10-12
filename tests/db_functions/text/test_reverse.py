@@ -1,7 +1,7 @@
 from django.db import connection
 from django.db.models import CharField, Value
 from django.db.models.functions import Length, Reverse, Trim
-from django.test import TestCase
+from django.test import TestCase, skipIfDBFeature
 from django.test.utils import register_lookup
 
 from ..models import Author
@@ -14,6 +14,7 @@ class ReverseTests(TestCase):
         cls.elena = Author.objects.create(name="Élena Jordan", alias="elena")
         cls.python = Author.objects.create(name="パイソン")
 
+    @skipIfDBFeature("interprets_empty_strings_as_nulls")
     def test_null(self):
         author = Author.objects.annotate(backward=Reverse("alias")).get(
             pk=self.python.pk

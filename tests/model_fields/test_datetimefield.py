@@ -40,7 +40,6 @@ class DateTimeFieldTests(TestCase):
         self.assertEqual(obj.t, tim)
 
     @override_settings(USE_TZ=False)
-    @skipUnlessDBFeature("supports_timezones")
     def test_lookup_date_without_use_tz(self):
         d = datetime.date(2014, 3, 12)
         dt1 = datetime.datetime(2014, 3, 12, 21, 22, 23, 240000)
@@ -54,7 +53,6 @@ class DateTimeFieldTests(TestCase):
     @requires_tz_support
     @skipUnlessDBFeature("has_zoneinfo_database")
     @override_settings(USE_TZ=True, TIME_ZONE="America/Vancouver")
-    @skipUnlessDBFeature("supports_timezones")
     def test_lookup_date_with_use_tz(self):
         d = datetime.date(2014, 3, 12)
         # The following is equivalent to UTC 2014-03-12 18:34:23.24000.

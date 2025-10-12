@@ -3,7 +3,7 @@ from unittest import skipUnless
 from django.db import connection
 from django.db.models import Value
 from django.db.models.functions import NullIf
-from django.test import TestCase
+from django.test import TestCase, skipIfDBFeature
 
 from ..models import Author
 
@@ -14,6 +14,7 @@ class NullIfTests(TestCase):
         Author.objects.create(name="John Smith", alias="smithj")
         Author.objects.create(name="Rhonda", alias="Rhonda")
 
+    @skipIfDBFeature("interprets_empty_strings_as_nulls")
     def test_basic(self):
         authors = Author.objects.annotate(nullif=NullIf("alias", "name")).values_list(
             "nullif"

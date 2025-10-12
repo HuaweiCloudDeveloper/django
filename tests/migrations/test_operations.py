@@ -1463,7 +1463,7 @@ class OperationTests(OperationTestBase):
         self.assertEqual(definition[1], [])
         self.assertEqual(sorted(definition[2]), ["field", "model_name", "name"])
 
-    @skipUnlessDBFeature("supports_stored_generated_columns")
+    @skipIfDBFeature("supports_stored_generated_columns")
     def test_add_generated_field(self):
         app_label = "test_add_generated_field"
         project_state = self.apply_operations(

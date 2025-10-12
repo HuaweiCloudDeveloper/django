@@ -190,7 +190,7 @@ class TestFixtures(TestCase):
         self.assertIsNone(Stuff.objects.all()[0].name)
         self.assertIsNone(Stuff.objects.all()[0].owner)
 
-    @skipUnlessDBFeature("interprets_empty_strings_as_nulls")
+    @skipIfDBFeature("interprets_empty_strings_as_nulls")
     def test_pretty_print_xml_empty_strings(self):
         """
         Regression test for ticket #4558 -- pretty printing of XML fixtures

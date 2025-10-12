@@ -175,7 +175,7 @@ class GenericRelationTests(TestCase):
         note = Note(note="Note for guild", content_object=g1)
         note.save()
 
-    @skipUnlessDBFeature("interprets_empty_strings_as_nulls")
+    @skipIfDBFeature("interprets_empty_strings_as_nulls")
     def test_gfk_to_model_with_empty_pk(self):
         """Test related to #13085"""
         # Saving model with GenericForeignKey to model instance with an

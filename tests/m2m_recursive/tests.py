@@ -1,6 +1,6 @@
 import datetime
 
-from django.test import TestCase
+from django.test import TestCase, skipIfDBFeature
 
 from .models import Person
 
@@ -26,6 +26,7 @@ class RecursiveM2MTests(TestCase):
             with self.subTest(person=person):
                 self.assertSequenceEqual(person.friends.all(), friends)
 
+    @skipIfDBFeature("supports_recursive_m2m")
     def test_recursive_m2m_reverse_add(self):
         # Add m2m for Anne in reverse direction.
         self.b.friends.add(self.a)
@@ -51,6 +52,7 @@ class RecursiveM2MTests(TestCase):
         self.assertSequenceEqual(self.a.idols.all(), [self.d])
         self.assertSequenceEqual(self.a.stalkers.all(), [])
 
+    @skipIfDBFeature("supports_recursive_m2m")
     def test_recursive_m2m_add_in_both_directions(self):
         # Adding the same relation twice results in a single relation.
         self.a.idols.add(self.d)
@@ -96,6 +98,7 @@ class RecursiveSymmetricalM2MThroughTests(TestCase):
             with self.subTest(person=person):
                 self.assertSequenceEqual(person.colleagues.all(), colleagues)
 
+    @skipIfDBFeature("supports_recursive_m2m")
     def test_recursive_m2m_reverse_add(self):
         # Add m2m for Anne in reverse direction.
         self.b.colleagues.add(

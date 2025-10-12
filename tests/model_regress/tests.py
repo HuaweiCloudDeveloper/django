@@ -90,7 +90,7 @@ class ModelTests(TestCase):
         a = Article.objects.get(pk=a.pk)
         self.assertEqual(len(a.article_text), 3000)
 
-    @skipUnlessDBFeature("supports_timezones")
+    @skipUnlessDBFeature("supports_datefield_without_time")
     def test_date_lookup(self):
         # Regression test for #659
         Party.objects.create(when=datetime.datetime(1999, 12, 31))

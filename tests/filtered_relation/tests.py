@@ -18,7 +18,7 @@ from django.db.models import (
 )
 from django.db.models.functions import Concat
 from django.db.models.lookups import Exact, IStartsWith
-from django.test import TestCase
+from django.test import TestCase, skipIfDBFeature
 from django.test.testcases import skipUnlessDBFeature
 
 from .models import (
@@ -216,6 +216,7 @@ class FilteredRelationTests(TestCase):
             str(queryset.query),
         )
 
+    @skipIfDBFeature("interprets_empty_strings_as_nulls")
     def test_multiple(self):
         qs = (
             Author.objects.annotate(

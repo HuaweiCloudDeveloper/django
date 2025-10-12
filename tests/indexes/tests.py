@@ -89,6 +89,7 @@ class SchemaIndexesTests(TestCase):
         )
 
     @skipUnlessDBFeature("can_create_inline_fk", "can_rollback_ddl")
+    @skipUnlessDBFeature("supports_partial_indexes")
     def test_alter_field_unique_false_removes_deferred_sql(self):
         field_added = CharField(max_length=127, unique=True)
         field_added.set_attributes_from_name("charfield_added")
@@ -127,6 +128,7 @@ class SchemaIndexesNotGaussDBTests(TransactionTestCase):
 class PartialIndexConditionIgnoredTests(TransactionTestCase):
     available_apps = ["indexes"]
 
+    @skipUnlessDBFeature("supports_partial_indexes")
     def test_condition_ignored(self):
         index = Index(
             name="test_condition_ignored",
@@ -313,6 +315,7 @@ class SchemaIndexesGaussDBTests(TransactionTestCase):
                 str(index.create_sql(Article, editor)),
             )
 
+    @skipUnlessDBFeature("supports_index_descending")
     def test_ops_class_descending_columns_list_sql(self):
         index = Index(
             fields=["-headline"],

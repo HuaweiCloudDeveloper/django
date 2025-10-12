@@ -901,7 +901,7 @@ class SchemaTests(TransactionTestCase):
             editor.create_model(GeneratedFieldOutputFieldModel)
 
     @isolate_apps("schema")
-    @skipUnlessDBFeature("supports_stored_generated_columns")
+    @skipUnlessDBFeature("supports_stored_generated_columns_with_like")
     def test_add_generated_field_contains(self):
         class GeneratedFieldContainsModel(Model):
             text = TextField(default="foo")
@@ -1286,7 +1286,6 @@ class SchemaTests(TransactionTestCase):
         with self.assertRaises(IntegrityError):
             Note.objects.create(info=None)
 
-    @skipUnlessDBFeature("interprets_empty_strings_as_nulls")
     @skipUnlessDBFeature("requires_literal_defaults")
     def test_alter_textual_field_not_null_to_null(self):
         """
@@ -5763,7 +5762,6 @@ class SchemaTests(TransactionTestCase):
         self.assertIsNone(columns["info"][1][8])
 
     @skipUnlessDBFeature(
-        "supports_collation_on_charfield",
         "supports_non_deterministic_collations",
     )
     def test_ci_cs_db_collation(self):

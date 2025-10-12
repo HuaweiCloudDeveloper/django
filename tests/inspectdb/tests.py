@@ -6,7 +6,7 @@ from django.core.management import call_command
 from django.core.management.commands import inspectdb
 from django.db import connection
 from django.db.backends.base.introspection import TableInfo
-from django.test import TestCase, TransactionTestCase, skipUnlessDBFeature
+from django.test import TestCase, TransactionTestCase, skipUnlessDBFeature, skipIfDBFeature
 
 from .models import PeopleMoreData, test_collation
 
@@ -178,8 +178,8 @@ class InspectDBTestCase(TestCase):
                 output,
             )
 
-    @skipUnlessDBFeature("supports_collation_on_textfield")
     @skipUnless(test_collation, "Language collations are not supported.")
+    @skipIfDBFeature("interprets_empty_strings_as_nulls")
     def test_text_field_db_collation(self):
         out = StringIO()
         call_command("inspectdb", "inspectdb_textfielddbcollation", stdout=out)
@@ -196,13 +196,14 @@ class InspectDBTestCase(TestCase):
                 output,
             )
 
-    @skipUnlessDBFeature("supports_unlimited_charfield")
+    @skipIfDBFeature("interprets_empty_strings_as_nulls")
     def test_char_field_unlimited(self):
         out = StringIO()
         call_command("inspectdb", "inspectdb_charfieldunlimited", stdout=out)
         output = out.getvalue()
         self.assertIn("char_field = models.CharField()", output)
 
+    @skipIfDBFeature("interprets_empty_strings_as_nulls")
     def test_number_field_types(self):
         """Test introspection of various Django field types"""
         assertFieldType = self.make_field_type_asserter()
