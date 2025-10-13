@@ -13,7 +13,7 @@ from django.db.models import (
     Model,
 )
 from django.db.models.functions import Lower
-from django.test import SimpleTestCase, TestCase, skipUnlessDBFeature
+from django.test import SimpleTestCase, TestCase, skipUnlessDBFeature, skipIfDBFeature
 from django.test.utils import isolate_apps
 
 from .models import (
@@ -333,6 +333,7 @@ class GeneratedFieldTestMixin:
         m = self._refresh_if_needed(m)
         self.assertEqual(m.field, "Constant")
 
+    @skipIfDBFeature("interprets_empty_strings_as_nulls")
     def test_nullable(self):
         m1 = self.nullable_model.objects.create()
         m1 = self._refresh_if_needed(m1)

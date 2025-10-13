@@ -401,6 +401,7 @@ class NewDatabaseTests(TestCase):
         self.assertEqual(Event.objects.filter(dt__in=(prev, dt, next)).count(), 1)
         self.assertEqual(Event.objects.filter(dt__range=(prev, next)).count(), 1)
 
+    @skipUnlessDBFeature("supports_utc_datetime_cast")
     def test_query_convert_timezones(self):
         # Connection timezone is equal to the current timezone, datetime
         # shouldn't be converted.

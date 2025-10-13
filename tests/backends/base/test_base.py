@@ -14,6 +14,7 @@ from ..models import Person, Square
 
 
 class DatabaseWrapperTests(SimpleTestCase):
+    databases = ['default']
     def test_repr(self):
         conn = connections[DEFAULT_DB_ALIAS]
         self.assertEqual(

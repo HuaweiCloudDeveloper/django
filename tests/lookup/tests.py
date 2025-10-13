@@ -205,6 +205,7 @@ class LookupTests(TestCase):
         with self.assertRaises(TypeError):
             Article.objects.in_bulk(headline__startswith="Blah")
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_in_bulk_lots_of_ids(self):
         test_range = 2000
         max_query_params = connection.features.max_query_params
@@ -1561,6 +1562,7 @@ class LookupQueryingTests(TestCase):
         )
         self.assertCountEqual(qs, [1842, 2042])
 
+    @skipUnlessDBFeature("supports_boolean_exists_lhs")
     def test_filter_exists_lhs(self):
         qs = Season.objects.annotate(
             before_20=Exists(

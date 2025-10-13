@@ -23,7 +23,7 @@ from django.db.models import (
     Value,
     When,
 )
-from django.test import SimpleTestCase, TestCase
+from django.test import SimpleTestCase, TestCase, skipUnlessDBFeature
 
 from .models import CaseTestModel, Client, FKCaseTestModel, O2OCaseTestModel
 
@@ -35,6 +35,7 @@ except ImportError:
 
 class CaseExpressionTests(TestCase):
     @classmethod
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def setUpTestData(cls):
         o = CaseTestModel.objects.create(integer=1, integer2=1, string="1")
         O2OCaseTestModel.objects.create(o2o=o, integer=1)

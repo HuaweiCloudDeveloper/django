@@ -1,12 +1,13 @@
 from django.db import connection
 from django.db.models import Value
 from django.db.models.functions import Length, Repeat
-from django.test import TestCase
+from django.test import TestCase, skipUnlessDBFeature
 
 from ..models import Author
 
 
 class RepeatTests(TestCase):
+    @skipUnlessDBFeature("supports_repeat_empty_string")
     def test_basic(self):
         Author.objects.create(name="John", alias="xyz")
         none_value = (

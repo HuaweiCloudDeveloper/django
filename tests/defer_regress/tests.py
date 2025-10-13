@@ -3,7 +3,7 @@ from operator import attrgetter
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.db.models import Count
-from django.test import TestCase
+from django.test import TestCase, skipUnlessDBFeature
 
 from .models import (
     Base,
@@ -259,6 +259,7 @@ class DeferRegressionTest(TestCase):
             list,
         )
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_common_model_different_mask(self):
         child = Child.objects.create(name="Child", value=42)
         second_child = Child.objects.create(name="Second", value=64)
@@ -293,6 +294,7 @@ class DeferRegressionTest(TestCase):
         with self.assertNumQueries(1):
             self.assertEqual(Request.objects.only("items").get(), request)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_defer_reverse_many_to_many_ignored(self):
         location = Location.objects.create()
         request = Request.objects.create(location=location)
@@ -301,6 +303,7 @@ class DeferRegressionTest(TestCase):
         with self.assertNumQueries(1):
             self.assertEqual(Item.objects.defer("request").get(), item)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_only_reverse_many_to_many_ignored(self):
         location = Location.objects.create()
         request = Request.objects.create(location=location)
@@ -335,6 +338,7 @@ class DeferDeletionSignalsTests(TestCase):
     senders = [Item, Proxy]
 
     @classmethod
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def setUpTestData(cls):
         cls.item_pk = Item.objects.create(value=1).pk
 

@@ -1,4 +1,4 @@
-from django.test import TestCase
+from django.test import TestCase, skipUnlessDBFeature
 
 from .models import BigS, UnicodeSlugField
 
@@ -12,6 +12,7 @@ class SlugFieldTests(TestCase):
         bs = BigS.objects.get(pk=bs.pk)
         self.assertEqual(bs.s, "slug" * 50)
 
+    @skipUnlessDBFeature("supports_unicode_identifiers")
     def test_slugfield_unicode_max_length(self):
         """
         SlugField with allow_unicode=True honors max_length.

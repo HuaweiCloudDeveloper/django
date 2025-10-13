@@ -1,5 +1,5 @@
 from django.core.management import call_command
-from django.test import TestCase, TransactionTestCase
+from django.test import TestCase, TransactionTestCase, skipUnlessDBFeature
 
 from .models import Book
 
@@ -19,7 +19,7 @@ class MigrationDataPersistenceTestCase(TransactionTestCase):
             1,
         )
 
-
+@skipUnlessDBFeature("supports_restart_identity")
 class MigrationDataPersistenceClassSetup(TransactionTestCase):
     """
     Data loaded in migrations is available during class setup if

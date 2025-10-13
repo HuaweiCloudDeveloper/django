@@ -3,7 +3,7 @@ from copy import deepcopy
 
 from django.core.exceptions import FieldError, MultipleObjectsReturned
 from django.db import IntegrityError, models, transaction
-from django.test import TestCase
+from django.test import TestCase, skipUnlessDBFeature
 from django.utils.deprecation import RemovedInDjango60Warning
 from django.utils.translation import gettext_lazy
 
@@ -543,6 +543,7 @@ class ManyToOneTests(TestCase):
         self.r.cached_query = Article.objects.filter(reporter=self.r)
         self.assertEqual(repr(deepcopy(self.r)), "<Reporter: John Smith>")
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_manager_class_caching(self):
         r1 = Reporter.objects.create(first_name="Mike")
         r2 = Reporter.objects.create(first_name="John")
@@ -665,6 +666,7 @@ class ManyToOneTests(TestCase):
             self.assertEqual(category.id, record.category_id)
             self.assertEqual(category.name, record.category.name)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_save_nullable_fk_after_parent(self):
         parent = Parent()
         child = ChildNullableParent(parent=parent)

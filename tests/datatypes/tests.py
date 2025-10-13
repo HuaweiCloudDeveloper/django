@@ -1,11 +1,12 @@
 import datetime
 
-from django.test import TestCase, skipIfDBFeature
+from django.test import TestCase, skipIfDBFeature, skipUnlessDBFeature
 
 from .models import Donut, RumBaba
 
 
 class DataTypesTestCase(TestCase):
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_boolean_type(self):
         d = Donut(name="Apple Fritter")
         self.assertFalse(d.is_frosted)
@@ -19,6 +20,7 @@ class DataTypesTestCase(TestCase):
         self.assertFalse(d2.is_frosted)
         self.assertTrue(d2.has_sprinkles)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_date_type(self):
         d = Donut(name="Apple Fritter")
         d.baked_date = datetime.date(year=1938, month=6, day=4)
@@ -33,6 +35,7 @@ class DataTypesTestCase(TestCase):
         self.assertEqual(d2.baked_time, datetime.time(5, 30))
         self.assertEqual(d2.consumed_at, datetime.datetime(2007, 4, 20, 16, 19, 59))
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_time_field(self):
         # Test for ticket #12059: TimeField wrongly handling datetime.datetime object.
         d = Donut(name="Apple Fritter")
@@ -44,6 +47,7 @@ class DataTypesTestCase(TestCase):
         d2 = Donut.objects.get(name="Apple Fritter")
         self.assertEqual(d2.baked_time, datetime.time(16, 19, 59))
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_year_boundaries(self):
         """Year boundary tests (ticket #3689)"""
         Donut.objects.create(

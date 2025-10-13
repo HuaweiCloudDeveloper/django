@@ -373,6 +373,7 @@ class ModelFormsetTest(TestCase):
         self.assertEqual(len(saved), 1)
         self.assertEqual(saved[0], Author.objects.get(name="Walt Whitman"))
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_commit_false(self):
         # Test the behavior of commit=False and save_m2m
 

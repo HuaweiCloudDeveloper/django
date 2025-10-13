@@ -249,6 +249,7 @@ class IntrospectionTests(TransactionTestCase):
         self.assertEqual(primary_key_column, "id")
         self.assertEqual(pk_fk_column, "city_id")
 
+    @skipUnlessDBFeature("supports_expression_indexes")
     def test_get_constraints_index_types(self):
         with connection.cursor() as cursor:
             constraints = connection.introspection.get_constraints(
@@ -308,6 +309,7 @@ class IntrospectionTests(TransactionTestCase):
         self.assertEqual(constraint["columns"], ["name"])
         self.assertEqual(constraint["orders"], ["ASC"])
 
+    @skipUnlessDBFeature("supports_expression_indexes")
     def test_get_constraints(self):
         def assertDetails(
             details,

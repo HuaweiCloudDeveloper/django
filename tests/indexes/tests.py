@@ -52,6 +52,7 @@ class SchemaIndexesTests(TestCase):
             "mysql": "indexes_article_c1_c2_looooooooooooooooooo_255179b2ix",
             "oracle": "indexes_a_c1_c2_loo_255179b2ix",
             "postgresql": "indexes_article_c1_c2_loooooooooooooooooo_255179b2ix",
+            "gaussdb": "indexes_article_c1_c2_loooooooooooooooooo_255179b2ix",
             "sqlite": "indexes_article_c1_c2_l%sng_255179b2ix" % ("o" * 100),
         }
         if connection.vendor not in expected:
@@ -88,6 +89,7 @@ class SchemaIndexesTests(TestCase):
         )
 
     @skipUnlessDBFeature("can_create_inline_fk", "can_rollback_ddl")
+    @skipUnlessDBFeature("supports_partial_indexes")
     def test_alter_field_unique_false_removes_deferred_sql(self):
         field_added = CharField(max_length=127, unique=True)
         field_added.set_attributes_from_name("charfield_added")
@@ -106,7 +108,7 @@ class SchemaIndexesTests(TestCase):
             self.assertIn("charfield_added", str(editor.deferred_sql[0].parts["name"]))
 
 
-class SchemaIndexesNotPostgreSQLTests(TransactionTestCase):
+class SchemaIndexesNotGaussDBTests(TransactionTestCase):
     available_apps = ["indexes"]
 
     def test_create_index_ignores_opclasses(self):
@@ -126,6 +128,7 @@ class SchemaIndexesNotPostgreSQLTests(TransactionTestCase):
 class PartialIndexConditionIgnoredTests(TransactionTestCase):
     available_apps = ["indexes"]
 
+    @skipUnlessDBFeature("supports_partial_indexes")
     def test_condition_ignored(self):
         index = Index(
             name="test_condition_ignored",
@@ -142,8 +145,8 @@ class PartialIndexConditionIgnoredTests(TransactionTestCase):
         )
 
 
-@skipUnless(connection.vendor == "postgresql", "PostgreSQL tests")
-class SchemaIndexesPostgreSQLTests(TransactionTestCase):
+@skipUnless(connection.vendor == "gaussdb", "GaussDB tests")
+class SchemaIndexesGaussDBTests(TransactionTestCase):
     available_apps = ["indexes"]
     get_opclass_query = """
         SELECT opcname, c.relname FROM pg_opclass AS oc
@@ -312,6 +315,7 @@ class SchemaIndexesPostgreSQLTests(TransactionTestCase):
                 str(index.create_sql(Article, editor)),
             )
 
+    @skipUnlessDBFeature("supports_index_descending")
     def test_ops_class_descending_columns_list_sql(self):
         index = Index(
             fields=["-headline"],

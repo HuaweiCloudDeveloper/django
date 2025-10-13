@@ -44,9 +44,9 @@ class TestAdminOrdering(TestCase):
     def setUpTestData(cls):
         Band.objects.bulk_create(
             [
-                Band(name="Aerosmith", bio="", rank=3),
-                Band(name="Radiohead", bio="", rank=1),
-                Band(name="Van Halen", bio="", rank=2),
+                Band(name="Aerosmith", bio=" ", rank=3),
+                Band(name="Radiohead", bio=" ", rank=1),
+                Band(name="Van Halen", bio=" ", rank=2),
             ]
         )
 
@@ -84,8 +84,8 @@ class TestAdminOrdering(TestCase):
         """
         Let's use a custom ModelAdmin that changes the ordering dynamically.
         """
-        super_user = User.objects.create(username="admin", is_superuser=True)
-        other_user = User.objects.create(username="other")
+        super_user = User.objects.create(username="admin", password=" ", first_name=" ", last_name=" ", email=" ", is_superuser=True)
+        other_user = User.objects.create(username="other", password=" ", first_name=" ", last_name=" ", email=" ")
         request = self.request_factory.get("/")
         request.user = super_user
         ma = DynOrderingBandAdmin(Band, site)
@@ -104,7 +104,7 @@ class TestInlineModelAdminOrdering(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        cls.band = Band.objects.create(name="Aerosmith", bio="", rank=3)
+        cls.band = Band.objects.create(name="Aerosmith", bio=" ", rank=3)
         Song.objects.bulk_create(
             [
                 Song(band=cls.band, name="Pink", duration=235),
@@ -134,8 +134,8 @@ class TestInlineModelAdminOrdering(TestCase):
 class TestRelatedFieldsAdminOrdering(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.b1 = Band.objects.create(name="Pink Floyd", bio="", rank=1)
-        cls.b2 = Band.objects.create(name="Foo Fighters", bio="", rank=5)
+        cls.b1 = Band.objects.create(name="Pink Floyd", bio=" ", rank=1)
+        cls.b2 = Band.objects.create(name="Foo Fighters", bio=" ", rank=5)
 
     def setUp(self):
         # we need to register a custom ModelAdmin (instead of just using

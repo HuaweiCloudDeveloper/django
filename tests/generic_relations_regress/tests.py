@@ -1,7 +1,7 @@
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import ProtectedError, Q, Sum
 from django.forms.models import modelform_factory
-from django.test import TestCase, skipIfDBFeature
+from django.test import TestCase, skipIfDBFeature, skipUnlessDBFeature
 
 from .models import (
     A,
@@ -63,11 +63,13 @@ class GenericRelationTests(TestCase):
         self.assertEqual(1, qs.count())
         self.assertEqual("Chef", qs[0].name)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_charlink_delete(self):
         oddrel = OddRelation1.objects.create(name="clink")
         CharLink.objects.create(content_object=oddrel)
         oddrel.delete()
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_textlink_delete(self):
         oddrel = OddRelation2.objects.create(name="tlink")
         TextLink.objects.create(content_object=oddrel)
@@ -87,6 +89,7 @@ class GenericRelationTests(TestCase):
             OddRelation2.objects.filter(tlinks__value="value"), [oddrel]
         )
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_coerce_object_id_remote_field_cache_persistence(self):
         restaurant = Restaurant.objects.create()
         CharLink.objects.create(content_object=restaurant)
@@ -300,6 +303,7 @@ class GenericRelationTests(TestCase):
         place = Place.objects.create(name="My Place")
         self.assertIn("GenericRelatedObjectManager", str(place.links))
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_filter_on_related_proxy_model(self):
         place = Place.objects.create()
         Link.objects.create(content_object=place)
@@ -334,6 +338,7 @@ class GenericRelationTests(TestCase):
         qs = Link.objects.exclude(places__name="Test Place 1")
         self.assertSequenceEqual(qs, [link2])
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_check_cached_value_pk_different_type(self):
         """Primary key is not checked if the content type doesn't match."""
         board = Board.objects.create(name="some test")

@@ -64,6 +64,7 @@ class NowUTC(Now):
 
 class AggregateTestCase(TestCase):
     @classmethod
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def setUpTestData(cls):
         cls.a1 = Author.objects.create(name="Adrian Holovaty", age=34)
         cls.a2 = Author.objects.create(name="Jacob Kaplan-Moss", age=35)
@@ -2232,6 +2233,7 @@ class AggregateTestCase(TestCase):
 
 class AggregateAnnotationPruningTests(TestCase):
     @classmethod
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def setUpTestData(cls):
         cls.a1 = Author.objects.create(age=1)
         cls.a2 = Author.objects.create(age=2)

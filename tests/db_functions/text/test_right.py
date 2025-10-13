@@ -1,7 +1,7 @@
 from django.db import connection
 from django.db.models import IntegerField, Value
 from django.db.models.functions import Length, Lower, Right
-from django.test import TestCase
+from django.test import TestCase, skipUnlessDBFeature
 
 from ..models import Author
 
@@ -27,6 +27,7 @@ class RightTests(TestCase):
         with self.assertRaisesMessage(ValueError, "'length' must be greater than 0"):
             Author.objects.annotate(raises=Right("name", 0))
 
+    @skipUnlessDBFeature("supports_right_zero_length")
     def test_zero_length(self):
         Author.objects.create(name="Tom", alias="tom")
         authors = Author.objects.annotate(

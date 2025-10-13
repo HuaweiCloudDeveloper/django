@@ -363,6 +363,7 @@ class ModelFormBaseTest(TestCase):
             [(character.pk, "user")],
         )
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_save_blank_false_with_required_false(self):
         """
         A ModelForm with a model with a field set to blank=False and the form
@@ -1100,6 +1101,7 @@ class UniqueTest(TestCase):
             ["Price with this Price and Quantity already exists."],
         )
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_unique_together_exclusion(self):
         """
         Forms don't validate unique_together constraints when only part of the
@@ -1243,6 +1245,7 @@ class UniqueTest(TestCase):
         form = ExplicitPKForm({"key": "", "desc": ""})
         self.assertFalse(form.is_valid())
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_explicitpk_unique(self):
         """Ensure keys and blank character strings are tested for uniqueness."""
         form = ExplicitPKForm({"key": "key1", "desc": ""})
@@ -1923,6 +1926,7 @@ class ModelFormBasicTests(TestCase):
             new_art.categories.order_by("name"), [self.c1, self.c2]
         )
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_custom_form_fields(self):
         # Here, we define a custom ModelForm. Because it happens to have the
         # same fields as the Category model, we can just call the form's save()
@@ -1943,6 +1947,7 @@ class ModelFormBasicTests(TestCase):
         self.assertEqual(form.save().name, "Third")
         self.assertEqual(Category.objects.get(id=cat.id).name, "Third")
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_runtime_choicefield_populated(self):
         self.maxDiff = None
         # Here, we demonstrate that choices for a ForeignKey ChoiceField are determined
@@ -2128,6 +2133,7 @@ class ModelMultipleChoiceFieldTests(TestCase):
         )
         cls.c3 = Category.objects.create(name="Third", slug="third-test", url="third")
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_model_multiple_choice_field(self):
         f = forms.ModelMultipleChoiceField(Category.objects.all())
         self.assertCountEqual(
@@ -2568,6 +2574,7 @@ class FileAndImageFieldTests(TestCase):
         self.assertIn("something.txt", rendered)
         self.assertIn("myfile-clear", rendered)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_render_empty_file_field(self):
         class DocumentForm(forms.ModelForm):
             class Meta:
@@ -2580,6 +2587,7 @@ class FileAndImageFieldTests(TestCase):
             str(form["myfile"]), '<input id="id_myfile" name="myfile" type="file">'
         )
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_file_field_data(self):
         # Test conditions when files is either not given or empty.
         f = TextFileForm(data={"description": "Assistance"})
@@ -2640,6 +2648,7 @@ class FileAndImageFieldTests(TestCase):
         instance.file.delete()
         instance.delete()
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_filefield_required_false(self):
         # Test the non-required FileField
         f = TextFileForm(data={"description": "Assistance"})
@@ -2670,6 +2679,7 @@ class FileAndImageFieldTests(TestCase):
         instance.file.delete()
         instance.delete()
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_custom_file_field_save(self):
         """
         Regression for #11149: save_form_data should be called only once
@@ -2730,6 +2740,7 @@ class FileAndImageFieldTests(TestCase):
         )
 
     @skipUnless(test_images, "Pillow not installed")
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_image_field(self):
         # ImageField and FileField are nearly identical, but they differ slightly when
         # it comes to validation. This specifically tests that #6302 is fixed for
@@ -3032,6 +3043,7 @@ class OtherModelFormTests(TestCase):
         with self.assertRaises(ValidationError):
             f.fields["status"].clean("z")
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_prefetch_related_queryset(self):
         """
         ModelChoiceField should respect a prefetch_related() on its queryset.
@@ -3745,6 +3757,7 @@ class StrictAssignmentTests(SimpleTestCase):
 
 
 class ModelToDictTests(TestCase):
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_many_to_many(self):
         """Data for a ManyToManyField is a list rather than a lazy QuerySet."""
         blue = Colour.objects.create(name="blue")

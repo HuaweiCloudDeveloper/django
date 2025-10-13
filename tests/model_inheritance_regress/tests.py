@@ -7,7 +7,7 @@ from operator import attrgetter
 from unittest import expectedFailure
 
 from django import forms
-from django.test import TestCase
+from django.test import TestCase, skipUnlessDBFeature
 
 from .models import (
     ArticleWithAuthor,
@@ -234,6 +234,7 @@ class ModelInheritanceTest(TestCase):
         with self.assertRaises(ItalianRestaurant.DoesNotExist):
             ItalianRestaurant.objects.get(pk=ident)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_issue_6755(self):
         """
         Regression test for #6755
@@ -463,6 +464,7 @@ class ModelInheritanceTest(TestCase):
         self.assertIs(BusStation._meta.pk.model, BusStation)
         self.assertIs(TrainStation._meta.pk.model, TrainStation)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_inherited_unique_field_with_form(self):
         """
         A model which has different primary key for the parent model passes
@@ -514,6 +516,7 @@ class ModelInheritanceTest(TestCase):
         p = Place.objects.select_related("restaurant")[0]
         self.assertIsInstance(p.restaurant.serves_pizza, bool)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_inheritance_select_related(self):
         # Regression test for #7246
         r1 = Restaurant.objects.create(
@@ -537,6 +540,7 @@ class ModelInheritanceTest(TestCase):
         jane = Supplier.objects.order_by("name").select_related("restaurant")[0]
         self.assertEqual(jane.restaurant.name, "Craft")
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_filter_with_parent_fk(self):
         r = Restaurant.objects.create()
         s = Supplier.objects.create(restaurant=r)
@@ -545,11 +549,13 @@ class ModelInheritanceTest(TestCase):
             Supplier.objects.filter(restaurant__in=Place.objects.all()), [s]
         )
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_ptr_accessor_assigns_state(self):
         r = Restaurant.objects.create()
         self.assertIs(r.place_ptr._state.adding, False)
         self.assertEqual(r.place_ptr._state.db, "default")
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_related_filtering_query_efficiency_ticket_15844(self):
         r = Restaurant.objects.create(
             name="Guido's House of Pasta",
@@ -599,6 +605,7 @@ class ModelInheritanceTest(TestCase):
             self.assertEqual(restaurant.place_ptr.restaurant, restaurant)
             self.assertEqual(restaurant.italianrestaurant, italian_restaurant)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_id_field_update_on_ancestor_change(self):
         place1 = Place.objects.create(name="House of Pasta", address="944 Fullerton")
         place2 = Place.objects.create(name="House of Pizza", address="954 Fullerton")
@@ -636,6 +643,7 @@ class ModelInheritanceTest(TestCase):
         self.assertIsNone(italian_restaurant.pk)
         self.assertIsNone(italian_restaurant.id)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_create_new_instance_with_pk_equals_none(self):
         p1 = Profile.objects.create(username="john")
         p2 = User.objects.get(pk=p1.user_ptr_id).profile
@@ -664,12 +672,14 @@ class ModelInheritanceTest(TestCase):
             "senator 1",
         )
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_mti_update_parent_through_child(self):
         Politician.objects.create()
         Congressman.objects.create()
         Congressman.objects.update(title="senator 1")
         self.assertEqual(Congressman.objects.get().title, "senator 1")
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_mti_update_grand_parent_through_child(self):
         Politician.objects.create()
         Senator.objects.create()

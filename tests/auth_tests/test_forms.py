@@ -28,7 +28,7 @@ from django.core import mail
 from django.core.exceptions import ValidationError
 from django.core.mail import EmailMultiAlternatives
 from django.forms.fields import CharField, Field, IntegerField
-from django.test import RequestFactory, SimpleTestCase, TestCase, override_settings
+from django.test import RequestFactory, SimpleTestCase, TestCase, override_settings, skipUnlessDBFeature
 from django.urls import reverse
 from django.utils import translation
 from django.utils.text import capfirst
@@ -49,6 +49,7 @@ from .settings import AUTH_TEMPLATES
 
 class TestDataMixin:
     @classmethod
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def setUpTestData(cls):
         cls.u1 = User.objects.create_user(
             username="testclient", password="password", email="testclient@example.com"

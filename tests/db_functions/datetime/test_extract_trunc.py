@@ -930,6 +930,7 @@ class DateFunctionTests(TestCase):
         else:
             self.assertIs(exists, False)
 
+    @skipUnlessDBFeature("supports_date_cast")
     def test_trunc_func(self):
         start_datetime = datetime(999, 6, 15, 14, 30, 50, 321)
         end_datetime = datetime(2016, 6, 15, 14, 10, 50, 123)
@@ -1821,6 +1822,7 @@ class DateFunctionWithTimeZoneTests(DateFunctionTests):
         self.assertEqual(model.melb_time, melb_start_datetime.time())
         self.assertEqual(model.pacific_time, pacific_start_datetime.time())
 
+    @skipUnlessDBFeature("supports_date_cast")
     def test_trunc_func_with_timezone(self):
         """
         If the truncated datetime transitions to a different offset (daylight

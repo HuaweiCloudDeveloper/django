@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 from django.forms.models import ModelChoiceIterator, ModelChoiceIteratorValue
 from django.forms.widgets import CheckboxSelectMultiple
 from django.template import Context, Template
-from django.test import TestCase
+from django.test import TestCase, skipUnlessDBFeature
 
 from .models import Article, Author, Book, Category, ExplicitPK, Writer
 
@@ -19,6 +19,7 @@ class ModelChoiceFieldTests(TestCase):
         cls.c2 = Category.objects.create(name="A test", slug="test", url="test")
         cls.c3 = Category.objects.create(name="Third", slug="third-test", url="third")
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_basics(self):
         f = forms.ModelChoiceField(Category.objects.all())
         self.assertEqual(
@@ -63,6 +64,7 @@ class ModelChoiceFieldTests(TestCase):
         with self.assertRaisesMessage(ValidationError, msg):
             f.clean(c4.id)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_clean_model_instance(self):
         f = forms.ModelChoiceField(Category.objects.all())
         self.assertEqual(f.clean(self.c1), self.c1)
@@ -245,6 +247,7 @@ class ModelChoiceFieldTests(TestCase):
         with self.assertNumQueries(1):
             template.render(Context({"field": field}))
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_disabled_modelchoicefield(self):
         class ModelChoiceForm(forms.ModelForm):
             author = forms.ModelChoiceField(Author.objects.all(), disabled=True)
@@ -274,6 +277,7 @@ class ModelChoiceFieldTests(TestCase):
 
         self.assertTrue(ModelChoiceForm(data={"categories": self.c1.pk}).is_valid())
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_disabled_multiplemodelchoicefield(self):
         class ArticleForm(forms.ModelForm):
             categories = forms.ModelMultipleChoiceField(

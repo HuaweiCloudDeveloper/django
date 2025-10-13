@@ -11,6 +11,7 @@ from django.test import (
     TestCase,
     ignore_warnings,
     override_settings,
+    skipUnlessDBFeature,
 )
 from django.urls import reverse
 from django.utils.deprecation import RemovedInDjango60Warning
@@ -31,6 +32,7 @@ class TestDataMixin:
 @ignore_warnings(category=RemovedInDjango60Warning)
 @override_settings(ROOT_URLCONF="generic_inline_admin.urls")
 class GenericAdminViewTest(TestDataMixin, TestCase):
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def setUp(self):
         self.client.force_login(self.superuser)
 
@@ -44,6 +46,7 @@ class GenericAdminViewTest(TestDataMixin, TestCase):
         m.save()
         self.png_media_pk = m.pk
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_basic_add_GET(self):
         """
         A smoke test to ensure GET on the add_view works.
@@ -51,6 +54,7 @@ class GenericAdminViewTest(TestDataMixin, TestCase):
         response = self.client.get(reverse("admin:generic_inline_admin_episode_add"))
         self.assertEqual(response.status_code, 200)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_basic_edit_GET(self):
         """
         A smoke test to ensure GET on the change_view works.
@@ -62,6 +66,7 @@ class GenericAdminViewTest(TestDataMixin, TestCase):
         )
         self.assertEqual(response.status_code, 200)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_basic_add_POST(self):
         """
         A smoke test to ensure POST on add_view works.
@@ -78,6 +83,7 @@ class GenericAdminViewTest(TestDataMixin, TestCase):
         )
         self.assertEqual(response.status_code, 302)  # redirect somewhere
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_basic_edit_POST(self):
         """
         A smoke test to ensure POST on edit_view works.
@@ -122,6 +128,7 @@ class GenericInlineAdminParametersTest(TestDataMixin, TestCase):
         Media.objects.create(content_object=e, url="http://example.com/podcast.mp3")
         return e
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_no_param(self):
         """
         With one initial form, extra (default) at 3, there should be 4 forms.
@@ -134,6 +141,7 @@ class GenericInlineAdminParametersTest(TestDataMixin, TestCase):
         self.assertEqual(formset.total_form_count(), 4)
         self.assertEqual(formset.initial_form_count(), 1)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_extra_param(self):
         """
         With extra=0, there should be one form.
@@ -156,6 +164,7 @@ class GenericInlineAdminParametersTest(TestDataMixin, TestCase):
         self.assertEqual(formset.total_form_count(), 1)
         self.assertEqual(formset.initial_form_count(), 1)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_max_num_param(self):
         """
         With extra=5 and max_num=2, there should be only 2 forms.
@@ -179,6 +188,7 @@ class GenericInlineAdminParametersTest(TestDataMixin, TestCase):
         self.assertEqual(formset.total_form_count(), 2)
         self.assertEqual(formset.initial_form_count(), 1)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_min_num_param(self):
         """
         With extra=3 and min_num=2, there should be five forms.
@@ -202,6 +212,7 @@ class GenericInlineAdminParametersTest(TestDataMixin, TestCase):
         self.assertEqual(formset.total_form_count(), 5)
         self.assertEqual(formset.initial_form_count(), 1)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_get_extra(self):
         class GetExtraInline(GenericTabularInline):
             model = Media
@@ -222,6 +233,7 @@ class GenericInlineAdminParametersTest(TestDataMixin, TestCase):
 
         self.assertEqual(formset.extra, 2)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_get_min_num(self):
         class GetMinNumInline(GenericTabularInline):
             model = Media
@@ -242,6 +254,7 @@ class GenericInlineAdminParametersTest(TestDataMixin, TestCase):
 
         self.assertEqual(formset.min_num, 2)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_get_max_num(self):
         class GetMaxNumInline(GenericTabularInline):
             model = Media

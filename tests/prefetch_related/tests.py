@@ -48,6 +48,7 @@ from .models import (
 
 class TestDataMixin:
     @classmethod
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def setUpTestData(cls):
         cls.book1 = Book.objects.create(title="Poems")
         cls.book2 = Book.objects.create(title="Jane Eyre")
@@ -516,6 +517,7 @@ class CustomPrefetchTests(TestCase):
         return ret_val
 
     @classmethod
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def setUpTestData(cls):
         cls.person1 = Person.objects.create(name="Joe")
         cls.person2 = Person.objects.create(name="Mary")
@@ -1114,6 +1116,7 @@ class CustomPrefetchTests(TestCase):
 
 class DefaultManagerTests(TestCase):
     @classmethod
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def setUpTestData(cls):
         cls.qual1 = Qualification.objects.create(name="BA")
         cls.qual2 = Qualification.objects.create(name="BSci")
@@ -1154,6 +1157,7 @@ class DefaultManagerTests(TestCase):
 
 class GenericRelationTests(TestCase):
     @classmethod
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def setUpTestData(cls):
         book1 = Book.objects.create(title="Winnie the Pooh")
         book2 = Book.objects.create(title="Do you like green eggs and spam?")
@@ -1181,6 +1185,7 @@ class GenericRelationTests(TestCase):
             qs = TaggedItem.objects.prefetch_related("content_object")
             list(qs)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_prefetch_GFK_nonint_pk(self):
         Comment.objects.create(comment="awesome", content_object=self.book1)
 
@@ -1189,12 +1194,14 @@ class GenericRelationTests(TestCase):
             qs = Comment.objects.prefetch_related("content_object")
             [c.content_object for c in qs]
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_prefetch_GFK_uuid_pk(self):
         article = Article.objects.create(name="Django")
         Comment.objects.create(comment="awesome", content_object_uuid=article)
         qs = Comment.objects.prefetch_related("content_object_uuid")
         self.assertEqual([c.content_object_uuid for c in qs], [article])
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_prefetch_GFK_fk_pk(self):
         book = Book.objects.create(title="Poems")
         book_with_year = BookWithYear.objects.create(book=book, published_year=2019)
@@ -1310,6 +1317,7 @@ class GenericRelationTests(TestCase):
                 ],
             )
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_reverse_generic_relation(self):
         # Create two distinct bookmarks to ensure the bookmark and
         # tagged item models primary are offset.
@@ -1327,6 +1335,7 @@ class GenericRelationTests(TestCase):
 
 class MultiTableInheritanceTest(TestCase):
     @classmethod
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def setUpTestData(cls):
         cls.book1 = BookWithYear.objects.create(title="Poems", published_year=2010)
         cls.book2 = BookWithYear.objects.create(title="More poems", published_year=2011)
@@ -1400,6 +1409,7 @@ class MultiTableInheritanceTest(TestCase):
 
 class ForeignKeyToFieldTest(TestCase):
     @classmethod
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def setUpTestData(cls):
         cls.book = Book.objects.create(title="Poems")
         cls.author1 = Author.objects.create(name="Jane", first_book=cls.book)
@@ -1447,6 +1457,7 @@ class LookupOrderingTest(TestCase):
     """
 
     @classmethod
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def setUpTestData(cls):
         person1 = Person.objects.create(name="Joe")
         person2 = Person.objects.create(name="Mary")
@@ -1495,6 +1506,7 @@ class LookupOrderingTest(TestCase):
 
 class NullableTest(TestCase):
     @classmethod
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def setUpTestData(cls):
         boss = Employee.objects.create(name="Peter")
         Employee.objects.create(name="Joe", boss=boss)
@@ -1704,6 +1716,7 @@ class MultiDbTests(TestCase):
 
 class Ticket19607Tests(TestCase):
     @classmethod
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def setUpTestData(cls):
         LessonEntry.objects.bulk_create(
             LessonEntry(id=id_, name1=name1, name2=name2)
@@ -1732,6 +1745,7 @@ class Ticket19607Tests(TestCase):
 
 class Ticket21410Tests(TestCase):
     @classmethod
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def setUpTestData(cls):
         book1 = Book.objects.create(title="Poems")
         book2 = Book.objects.create(title="Jane Eyre")
@@ -1754,6 +1768,7 @@ class Ticket21410Tests(TestCase):
 
 class Ticket21760Tests(TestCase):
     @classmethod
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def setUpTestData(cls):
         cls.rooms = []
         for _ in range(3):
@@ -1787,6 +1802,7 @@ class DirectPrefetchedObjectCacheReuseTests(TestCase):
     """
 
     @classmethod
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def setUpTestData(cls):
         cls.book1, cls.book2 = [
             Book.objects.create(title="book1"),
@@ -1924,6 +1940,7 @@ class DirectPrefetchedObjectCacheReuseTests(TestCase):
 
 class ReadPrefetchedObjectsCacheTests(TestCase):
     @classmethod
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def setUpTestData(cls):
         cls.book1 = Book.objects.create(title="Les confessions Volume I")
         cls.book2 = Book.objects.create(title="Candide")
@@ -1962,6 +1979,7 @@ class ReadPrefetchedObjectsCacheTests(TestCase):
 
 class NestedPrefetchTests(TestCase):
     @classmethod
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def setUpTestData(cls):
         house = House.objects.create(name="Big house", address="123 Main St")
         cls.room = Room.objects.create(name="Kitchen", house=house)
@@ -2100,6 +2118,7 @@ class DeprecationTests(TestCase):
         self.assertEqual(ctx.filename, __file__)
 
     @ignore_warnings(category=RemovedInDjango60Warning)
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_prefetch_one_level_fallback(self):
         class NoGetPrefetchQuerySetsDescriptor(ForwardManyToOneDescriptor):
             def get_prefetch_queryset(self, instances, queryset=None):

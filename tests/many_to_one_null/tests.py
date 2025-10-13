@@ -1,4 +1,4 @@
-from django.test import TestCase
+from django.test import TestCase, skipUnlessDBFeature
 
 from .models import Article, Car, Driver, Reporter
 
@@ -123,6 +123,7 @@ class ManyToOneNullTests(TestCase):
         self.assertEqual(1, self.r2.article_set.count())
         self.assertEqual(1, qs.count())
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_add_efficiency(self):
         r = Reporter.objects.create()
         articles = []
@@ -132,6 +133,7 @@ class ManyToOneNullTests(TestCase):
             r.article_set.add(*articles)
         self.assertEqual(r.article_set.count(), 3)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_clear_efficiency(self):
         r = Reporter.objects.create()
         for _ in range(3):

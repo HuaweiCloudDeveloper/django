@@ -9,7 +9,7 @@ from django.contrib.auth.mixins import (
 from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
-from django.test import RequestFactory, SimpleTestCase, TestCase
+from django.test import RequestFactory, SimpleTestCase, TestCase, skipUnlessDBFeature
 from django.views.generic import View
 
 
@@ -53,6 +53,7 @@ class StackedMixinsView2(
 class AccessMixinTests(TestCase):
     factory = RequestFactory()
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_stacked_mixins_success(self):
         user = models.User.objects.create(username="joe", password="qwerty")
         perms = models.Permission.objects.filter(
@@ -70,6 +71,7 @@ class AccessMixinTests(TestCase):
         response = view(request)
         self.assertEqual(response.status_code, 200)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_stacked_mixins_missing_permission(self):
         user = models.User.objects.create(username="joe", password="qwerty")
         perms = models.Permission.objects.filter(codename__in=("add_customuser",))
@@ -85,6 +87,7 @@ class AccessMixinTests(TestCase):
         with self.assertRaises(PermissionDenied):
             view(request)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_access_mixin_permission_denied_response(self):
         user = models.User.objects.create(username="joe", password="qwerty")
         # Authenticated users receive PermissionDenied.
@@ -114,6 +117,7 @@ class AccessMixinTests(TestCase):
         )
 
     @mock.patch.object(models.User, "is_authenticated", False)
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_stacked_mixins_not_logged_in(self):
         user = models.User.objects.create(username="joe", password="qwerty")
         perms = models.Permission.objects.filter(
@@ -214,6 +218,7 @@ class LoginRequiredMixinTests(TestCase):
     factory = RequestFactory()
 
     @classmethod
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def setUpTestData(cls):
         cls.user = models.User.objects.create(username="joe", password="qwerty")
 
@@ -243,6 +248,7 @@ class PermissionsRequiredMixinTests(TestCase):
     factory = RequestFactory()
 
     @classmethod
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def setUpTestData(cls):
         cls.user = models.User.objects.create(username="joe", password="qwerty")
         perms = models.Permission.objects.filter(

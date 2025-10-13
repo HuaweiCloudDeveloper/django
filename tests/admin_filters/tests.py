@@ -18,7 +18,7 @@ from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 from django.core.exceptions import ImproperlyConfigured
 from django.db import connection, models
-from django.test import RequestFactory, SimpleTestCase, TestCase, override_settings
+from django.test import RequestFactory, SimpleTestCase, TestCase, override_settings, skipUnlessDBFeature
 
 from .models import Book, Bookmark, Department, Employee, ImprovedBook, TaggedItem
 
@@ -1380,6 +1380,7 @@ class ListFiltersTests(TestCase):
         self.assertIs(choices[2]["selected"], False)
         self.assertEqual(choices[2]["query_string"], "?publication-decade=the+00s")
 
+    @skipUnlessDBFeature("supports_subquery_variable_references")
     def _test_facets(self, modeladmin, request, query_string=None):
         request.user = self.alfred
         changelist = modeladmin.get_changelist_instance(request)
@@ -1447,16 +1448,19 @@ class ListFiltersTests(TestCase):
                     for choice in choices:
                         self.assertIn(query_string, choice["query_string"])
 
+    @skipUnlessDBFeature("supports_subquery_variable_references")
     def test_facets_always(self):
         modeladmin = DecadeFilterBookAdminWithAlwaysFacets(Book, site)
         request = self.request_factory.get("/")
         self._test_facets(modeladmin, request)
 
+    @skipUnlessDBFeature("supports_subquery_variable_references")
     def test_facets_no_filter(self):
         modeladmin = DecadeFilterBookAdmin(Book, site)
         request = self.request_factory.get("/?_facets")
         self._test_facets(modeladmin, request, query_string="_facets")
 
+    @skipUnlessDBFeature("supports_subquery_variable_references")
     def test_facets_filter(self):
         modeladmin = DecadeFilterBookAdmin(Book, site)
         request = self.request_factory.get(
@@ -1865,6 +1869,7 @@ class ListFiltersTests(TestCase):
         changelist.get_results(request)
         self.assertEqual(changelist.full_result_count, 4)
 
+    @skipUnlessDBFeature("supports_isempty_lookup")
     def test_emptylistfieldfilter(self):
         empty_description = Department.objects.create(code="EMPT", description="")
         none_description = Department.objects.create(code="NONE", description=None)

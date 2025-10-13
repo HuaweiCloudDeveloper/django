@@ -6,7 +6,7 @@ from django.contrib.admin.utils import quote
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.db.models.signals import post_save, pre_save
-from django.test import TestCase, override_settings
+from django.test import TestCase, override_settings, skipUnlessDBFeature
 from django.urls import reverse
 from django.utils import translation
 from django.utils.deprecation import RemovedInDjango60Warning
@@ -26,16 +26,19 @@ class LogEntryTests(TestCase):
         cls.a1 = Article.objects.create(
             site=cls.site,
             title="Title",
+            hist=" ",
             created=datetime(2008, 3, 12, 11, 54),
         )
         cls.a2 = Article.objects.create(
             site=cls.site,
             title="Title 2",
+            hist=" ",
             created=datetime(2009, 3, 12, 11, 54),
         )
         cls.a3 = Article.objects.create(
             site=cls.site,
             title="Title 3",
+            hist=" ",
             created=datetime(2010, 3, 12, 11, 54),
         )
         LogEntry.objects.log_actions(
@@ -137,6 +140,7 @@ class LogEntryTests(TestCase):
         ).latest("id")
         self.assertEqual(logentry.get_change_message(), "Changed Title and History.")
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_logentry_change_message_formsets(self):
         """
         All messages for changed formsets are logged in a change message.
@@ -144,6 +148,7 @@ class LogEntryTests(TestCase):
         a2 = Article.objects.create(
             site=self.site,
             title="Title second article",
+            hist=" ",
             created=datetime(2012, 3, 18, 11, 54),
         )
         post_data = {
@@ -329,7 +334,7 @@ class LogEntryTests(TestCase):
             self.assertNumQueries(3),
             self.assertWarnsMessage(RemovedInDjango60Warning, msg) as ctx,
         ):
-            LogEntry.objects2.log_actions(self.user.pk, queryset, DELETION)
+            LogEntry.objects2.log_actions(self.user.pk, queryset, DELETION, change_message=" ")
         self.assertEqual(ctx.filename, __file__)
         log_values = (
             LogEntry.objects.filter(action_flag=DELETION)
@@ -350,7 +355,7 @@ class LogEntryTests(TestCase):
                 str(obj.pk),
                 "Test Repr",
                 DELETION,
-                "",
+                " ",
             )
             for obj in queryset
         ]
@@ -416,6 +421,7 @@ class LogEntryTests(TestCase):
         counted_presence_after = response.content.count(should_contain)
         self.assertEqual(counted_presence_before - 1, counted_presence_after)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_proxy_model_content_type_is_used_for_log_entries(self):
         """
         Log entries for proxy models should have the proxy model's contenttype
@@ -430,6 +436,7 @@ class LogEntryTests(TestCase):
             "hist": "Bar",
             "created_0": "2015-12-25",
             "created_1": "00:00",
+            "change_message": " ",
         }
         changelist_url = reverse("admin:admin_utils_articleproxy_changelist")
         expected_signals = []

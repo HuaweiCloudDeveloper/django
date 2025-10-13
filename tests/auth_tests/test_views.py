@@ -32,7 +32,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.db import connection
 from django.http import HttpRequest, HttpResponse
 from django.middleware.csrf import CsrfViewMiddleware, get_token
-from django.test import Client, TestCase, modify_settings, override_settings
+from django.test import Client, TestCase, modify_settings, override_settings, skipUnlessDBFeature
 from django.test.client import RedirectCycleError
 from django.urls import NoReverseMatch, reverse, reverse_lazy
 from django.utils.http import urlsafe_base64_encode
@@ -501,6 +501,7 @@ class CustomUserPasswordResetTest(AuthViewsTestCase):
     user_email = "staffmember@example.com"
 
     @classmethod
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def setUpTestData(cls):
         cls.u1 = CustomUser.custom_objects.create(
             email="staffmember@example.com",
@@ -543,6 +544,7 @@ class CustomUserPasswordResetTest(AuthViewsTestCase):
 @override_settings(AUTH_USER_MODEL="auth_tests.CustomUserCompositePrimaryKey")
 class CustomUserCompositePrimaryKeyPasswordResetTest(CustomUserPasswordResetTest):
     @classmethod
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def setUpTestData(cls):
         cls.u1 = CustomUserCompositePrimaryKey.custom_objects.create(
             email="staffmember@example.com",
@@ -1502,6 +1504,7 @@ class ChangelistTests(MessagesTestMixin, AuthViewsTestCase):
             )
         self.assertEqual(response.status_code, 400)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_user_change_email(self):
         data = self.get_user_data(self.admin)
         data["email"] = "new_" + data["email"]
@@ -1512,6 +1515,7 @@ class ChangelistTests(MessagesTestMixin, AuthViewsTestCase):
         row = LogEntry.objects.latest("id")
         self.assertEqual(row.get_change_message(), "Changed Email address.")
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_user_not_change(self):
         response = self.client.post(
             reverse("auth_test_admin:auth_user_change", args=(self.admin.pk,)),

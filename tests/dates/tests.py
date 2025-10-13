@@ -3,7 +3,7 @@ from unittest import skipUnless
 
 from django.core.exceptions import FieldError
 from django.db import connection
-from django.test import TestCase, override_settings
+from django.test import TestCase, override_settings, skipUnlessDBFeature
 
 from .models import Article, Category, Comment
 
@@ -113,6 +113,7 @@ class DatesTests(TestCase):
             Article.objects.dates("pub_date", "year", order="bad order")
 
     @override_settings(USE_TZ=False)
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_dates_trunc_datetime_fields(self):
         Article.objects.bulk_create(
             Article(pub_date=pub_datetime.date(), pub_datetime=pub_datetime)

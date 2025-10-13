@@ -31,6 +31,7 @@ from django.test import (
     TestCase,
     ignore_warnings,
     override_settings,
+    skipUnlessDBFeature,
 )
 from django.test.utils import requires_tz_support
 from django.urls import NoReverseMatch, reverse_lazy
@@ -799,6 +800,7 @@ class FileFieldStorageTests(TestCase):
         except Exception:
             return 255  # Should be safe on most backends
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_files(self):
         self.assertIsInstance(Storage.normal, FileDescriptor)
 
@@ -843,6 +845,7 @@ class FileFieldStorageTests(TestCase):
         )
         obj2.normal.close()
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_filefield_read(self):
         # Files can be read in a little at a time, if necessary.
         obj = Storage.objects.create(
@@ -856,6 +859,7 @@ class FileFieldStorageTests(TestCase):
         )
         obj.normal.close()
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_filefield_write(self):
         # Files can be written to.
         obj = Storage.objects.create(
@@ -868,6 +872,7 @@ class FileFieldStorageTests(TestCase):
         self.assertEqual(obj.normal.read(), b"updated")
         obj.normal.close()
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_filefield_reopen(self):
         obj = Storage.objects.create(
             normal=SimpleUploadedFile("reopen.txt", b"content")
@@ -878,6 +883,7 @@ class FileFieldStorageTests(TestCase):
         obj.normal.file.seek(0)
         obj.normal.close()
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_duplicate_filename(self):
         # Multiple files with the same name get _(7 random chars) appended to them.
         tests = [
@@ -899,6 +905,7 @@ class FileFieldStorageTests(TestCase):
                     for o in objs:
                         o.delete()
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_file_truncation(self):
         # Given the max_length is limited, when multiple files get uploaded
         # under the same name, then the filename get truncated in order to fit
@@ -931,6 +938,7 @@ class FileFieldStorageTests(TestCase):
         sys.platform == "win32",
         "Windows supports at most 260 characters in a path.",
     )
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_extended_length_storage(self):
         # Testing FileField with max_length > 255. Most systems have filename
         # length limitation of 255. Path takes extra chars.
@@ -943,6 +951,7 @@ class FileFieldStorageTests(TestCase):
         self.assertEqual(obj.extended_length.read(), b"Same Content")
         obj.extended_length.close()
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_filefield_default(self):
         # Default values allow an object to access a single file.
         temp_storage.save("tests/default.txt", ContentFile("default content"))
@@ -958,6 +967,7 @@ class FileFieldStorageTests(TestCase):
         self.assertEqual(obj.default.read(), b"default content")
         obj.default.close()
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_filefield_db_default(self):
         temp_storage.save("tests/db_default.txt", ContentFile("default content"))
         obj = Storage.objects.create()
@@ -972,6 +982,7 @@ class FileFieldStorageTests(TestCase):
         self.assertEqual(s.db_default.read(), b"default content")
         s.db_default.close()
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_empty_upload_to(self):
         # upload_to can be empty, meaning it does not use subdirectory.
         obj = Storage()
@@ -980,6 +991,7 @@ class FileFieldStorageTests(TestCase):
         self.assertEqual(obj.empty.read(), b"more content")
         obj.empty.close()
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_pathlib_upload_to(self):
         obj = Storage()
         obj.pathlib_callable.save("some_file1.txt", ContentFile("some content"))
@@ -988,6 +1000,7 @@ class FileFieldStorageTests(TestCase):
         self.assertEqual(obj.pathlib_direct.name, "bar/some_file2.txt")
         obj.random.close()
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_random_upload_to(self):
         # Verify the fix for #5655, making sure the directory is only
         # determined once.
@@ -996,6 +1009,7 @@ class FileFieldStorageTests(TestCase):
         self.assertTrue(obj.random.name.endswith("/random_file"))
         obj.random.close()
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_custom_valid_name_callable_upload_to(self):
         """
         Storage.get_valid_name() should be called when upload_to is a callable.
@@ -1006,6 +1020,7 @@ class FileFieldStorageTests(TestCase):
         self.assertTrue(obj.custom_valid_name.name.endswith("/random_file_valid"))
         obj.custom_valid_name.close()
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_filefield_pickling(self):
         # Push an object into the cache to make sure it pickles properly
         obj = Storage()
@@ -1045,6 +1060,7 @@ class FileFieldStorageTests(TestCase):
             }
         }
     )
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_create_file_field_from_another_file_field_in_memory_storage(self):
         f = ContentFile("content", "file.txt")
         obj = Storage.objects.create(storage_callable_default=f)

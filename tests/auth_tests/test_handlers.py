@@ -1,6 +1,6 @@
 from django.contrib.auth.handlers.modwsgi import check_password, groups_for_user
 from django.contrib.auth.models import Group, User
-from django.test import TransactionTestCase, override_settings
+from django.test import TransactionTestCase, override_settings, skipUnlessDBFeature
 
 from .models import CustomUser
 
@@ -39,6 +39,7 @@ class ModWsgiHandlerTestCase(TransactionTestCase):
         self.assertFalse(check_password({}, "test", "incorrect"))
 
     @override_settings(AUTH_USER_MODEL="auth_tests.CustomUser")
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_check_password_custom_user(self):
         """
         check_password() returns the correct values as per

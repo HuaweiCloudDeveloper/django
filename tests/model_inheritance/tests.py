@@ -3,7 +3,7 @@ from operator import attrgetter
 from django.core.exceptions import FieldError, ValidationError
 from django.db import connection, models
 from django.db.models.query_utils import DeferredAttribute
-from django.test import SimpleTestCase, TestCase
+from django.test import SimpleTestCase, TestCase, skipUnlessDBFeature
 from django.test.utils import CaptureQueriesContext, isolate_apps
 
 from .models import (
@@ -202,6 +202,7 @@ class ModelInheritanceTests(TestCase):
             if "UPDATE" in sql:
                 self.assertEqual(expected_sql, sql)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_create_child_no_update(self):
         """Creating a child with non-abstract parents only issues INSERTs."""
 
@@ -226,6 +227,7 @@ class ModelInheritanceTests(TestCase):
                     sql = query["sql"]
                     self.assertIn("INSERT INTO", sql, sql)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_create_copy_with_inherited_m2m(self):
         restaurant = Restaurant.objects.create()
         supplier = CustomSupplier.objects.create(
@@ -297,6 +299,7 @@ class ModelInheritanceTests(TestCase):
 
         self.assertEqual(A.attr.called, (A, "attr"))
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_inherited_ordering_pk_desc(self):
         p1 = Parent.objects.create(first_name="Joe", email="joe@email.com")
         p2 = Parent.objects.create(first_name="Jon", email="jon@email.com")
@@ -343,6 +346,7 @@ class ModelInheritanceTests(TestCase):
 
         self.assertEqual(type(MethodOverride.foo), DeferredAttribute)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_full_clean(self):
         restaurant = Restaurant.objects.create()
         with self.assertNumQueries(0), self.assertRaises(ValidationError):
@@ -542,6 +546,7 @@ class ModelInheritanceDataTests(TestCase):
         self.assertEqual(qs[1].italianrestaurant.name, "Ristorante Miron")
         self.assertEqual(qs[1].italianrestaurant.rating, 4)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_parent_cache_reuse(self):
         place = Place.objects.create()
         GrandChild.objects.create(place=place)

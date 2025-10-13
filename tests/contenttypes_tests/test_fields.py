@@ -3,7 +3,7 @@ import json
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.prefetch import GenericPrefetch
 from django.db import models
-from django.test import TestCase
+from django.test import TestCase, skipUnlessDBFeature
 from django.test.utils import isolate_apps
 from django.utils.deprecation import RemovedInDjango60Warning
 
@@ -68,6 +68,7 @@ class GenericForeignKeyTests(TestCase):
 
 
 class GenericRelationTests(TestCase):
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_value_to_string(self):
         question = Question.objects.create(text="test")
         answer1 = Answer.objects.create(question=question)

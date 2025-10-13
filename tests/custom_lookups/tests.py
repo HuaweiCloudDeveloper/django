@@ -6,7 +6,7 @@ from django.core.exceptions import FieldError
 from django.db import connection, models
 from django.db.models.fields.related_lookups import RelatedGreaterThan
 from django.db.models.lookups import EndsWith, StartsWith
-from django.test import SimpleTestCase, TestCase, override_settings
+from django.test import SimpleTestCase, TestCase, override_settings, skipUnlessDBFeature
 from django.test.utils import register_lookup
 from django.utils import timezone
 
@@ -235,6 +235,7 @@ class RelatedMoreThan(RelatedGreaterThan):
 
 
 class LookupTests(TestCase):
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_custom_name_lookup(self):
         a1 = Author.objects.create(name="a1", birthdate=date(1981, 2, 16))
         Author.objects.create(name="a2", birthdate=date(2012, 2, 29))
@@ -249,6 +250,7 @@ class LookupTests(TestCase):
             self.assertSequenceEqual(qs1, [a1])
             self.assertSequenceEqual(qs2, [a1])
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_custom_exact_lookup_none_rhs(self):
         """
         __exact=None is transformed to __isnull=True if a custom lookup class
@@ -263,6 +265,7 @@ class LookupTests(TestCase):
         finally:
             field.register_lookup(OldExactLookup, "exact")
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_basic_lookup(self):
         a1 = Author.objects.create(name="a1", age=1)
         a2 = Author.objects.create(name="a2", age=2)
@@ -301,6 +304,7 @@ class LookupTests(TestCase):
                 Author.objects.filter(birthdate__inmonth=date(2012, 4, 1)), []
             )
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_div3_extract(self):
         with register_lookup(models.IntegerField, Div3Transform):
             a1 = Author.objects.create(name="a1", age=1)
@@ -343,6 +347,7 @@ class LookupTests(TestCase):
 
 
 class BilateralTransformTests(TestCase):
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_bilateral_upper(self):
         with register_lookup(models.CharField, UpperBilateralTransform):
             author1 = Author.objects.create(name="Doe")
@@ -365,6 +370,7 @@ class BilateralTransformTests(TestCase):
                     name__upper__in=Author.objects.values_list("name")
                 )
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_bilateral_multi_value(self):
         with register_lookup(models.CharField, UpperBilateralTransform):
             Author.objects.bulk_create(
@@ -382,6 +388,7 @@ class BilateralTransformTests(TestCase):
                 lambda a: a.name,
             )
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_div3_bilateral_extract(self):
         with register_lookup(models.IntegerField, Div3BilateralTransform):
             a1 = Author.objects.create(name="a1", age=1)
@@ -398,6 +405,7 @@ class BilateralTransformTests(TestCase):
                 baseqs.filter(age__div3__range=(1, 2)), [a1, a2, a4]
             )
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_bilateral_order(self):
         with register_lookup(
             models.IntegerField, Mult3BilateralTransform, Div3BilateralTransform
@@ -414,6 +422,7 @@ class BilateralTransformTests(TestCase):
             )
             self.assertSequenceEqual(baseqs.filter(age__div3__mult3=42), [a3])
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_transform_order_by(self):
         with register_lookup(models.IntegerField, LastDigitTransform):
             a1 = Author.objects.create(name="a1", age=11)
@@ -423,6 +432,7 @@ class BilateralTransformTests(TestCase):
             qs = Author.objects.order_by("age__lastdigit")
             self.assertSequenceEqual(qs, [a4, a1, a3, a2])
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_bilateral_fexpr(self):
         with register_lookup(models.IntegerField, Mult3BilateralTransform):
             a1 = Author.objects.create(name="a1", age=1, average_rating=3.2)
@@ -453,6 +463,7 @@ class DateTimeLookupTests(TestCase):
 
 class YearLteTests(TestCase):
     @classmethod
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def setUpTestData(cls):
         cls.a1 = Author.objects.create(name="a1", birthdate=date(1981, 2, 16))
         cls.a2 = Author.objects.create(name="a2", birthdate=date(2012, 2, 29))
@@ -654,6 +665,7 @@ class CustomisedMethodsTests(SimpleTestCase):
 
 
 class SubqueryTransformTests(TestCase):
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_subquery_usage(self):
         with register_lookup(models.IntegerField, Div3Transform):
             Author.objects.create(name="a1", age=1)

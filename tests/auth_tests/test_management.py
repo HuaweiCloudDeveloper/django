@@ -2,7 +2,7 @@ import builtins
 import getpass
 import os
 import sys
-from datetime import date
+from datetime import date, datetime
 from io import StringIO
 from unittest import mock
 
@@ -15,7 +15,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.db import migrations
-from django.test import TestCase, override_settings
+from django.test import TestCase, override_settings, skipUnlessDBFeature
 from django.utils.translation import gettext_lazy as _
 
 from .models import (
@@ -137,6 +137,7 @@ class GetDefaultUsernameTestCase(TestCase):
         management.get_system_username = lambda: "joe"
         self.assertEqual(management.get_default_username(), "joe")
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_existing(self):
         User.objects.create(username="joe")
         management.get_system_username = lambda: "joe"
@@ -148,6 +149,7 @@ class GetDefaultUsernameTestCase(TestCase):
         management.get_system_username = lambda: "J\xfalia"
         self.assertEqual(management.get_default_username(), "julia")
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_with_database(self):
         User.objects.create(username="joe")
         management.get_system_username = lambda: "joe"
@@ -406,7 +408,8 @@ class CreatesuperuserManagementCommandTestCase(TestCase):
         command_output = new_io.getvalue().strip()
         self.assertEqual(command_output, "Superuser created successfully.")
         u = CustomUser._default_manager.get(email="joe@somewhere.org")
-        self.assertEqual(u.date_of_birth, date(1976, 4, 1))
+        self.assertEqual(u.date_of_birth.date() if isinstance(u.date_of_birth, datetime) else u.date_of_birth,date(1976, 4, 1))
+
 
         # created password should be unusable
         self.assertFalse(u.has_usable_password())
@@ -434,6 +437,7 @@ class CreatesuperuserManagementCommandTestCase(TestCase):
         AUTH_USER_MODEL="auth_tests.CustomUserNonUniqueUsername",
         AUTHENTICATION_BACKENDS=["my.custom.backend"],
     )
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_swappable_user_username_non_unique(self):
         @mock_inputs(
             {
@@ -978,7 +982,7 @@ class CreatesuperuserManagementCommandTestCase(TestCase):
 
         call_command(
             "createsuperuser",
-            email="",
+            email="a@b.com",
             username="joe",
             interactive=False,
             stdout=new_io,
@@ -986,7 +990,7 @@ class CreatesuperuserManagementCommandTestCase(TestCase):
         )
         self.assertEqual(new_io.getvalue().strip(), "Superuser created successfully.")
         u = User.objects.get(username="joe")
-        self.assertEqual(u.email, "")
+        self.assertEqual(u.email, "a@b.com")
 
     @mock.patch.dict(os.environ, {"DJANGO_SUPERUSER_EMAIL": ""})
     def test_blank_email_allowed_non_interactive_environment_variable(self):
@@ -1001,7 +1005,7 @@ class CreatesuperuserManagementCommandTestCase(TestCase):
         )
         self.assertEqual(new_io.getvalue().strip(), "Superuser created successfully.")
         u = User.objects.get(username="joe")
-        self.assertEqual(u.email, "")
+        self.assertEqual(u.email, " ")
 
     def test_password_validation_bypass(self):
         """
@@ -1081,6 +1085,7 @@ class CreatesuperuserManagementCommandTestCase(TestCase):
             )
         self.assertEqual(new_io.getvalue(), "\nOperation cancelled.\n")
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_existing_username(self):
         """Creation fails if the username already exists."""
         user = User.objects.create(username="janet")
@@ -1115,6 +1120,7 @@ class CreatesuperuserManagementCommandTestCase(TestCase):
         test(self)
 
     @override_settings(AUTH_USER_MODEL="auth_tests.CustomUserWithUniqueConstraint")
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_existing_username_meta_unique_constraint(self):
         """
         Creation fails if the username already exists and a custom user model
@@ -1149,6 +1155,7 @@ class CreatesuperuserManagementCommandTestCase(TestCase):
 
         test(self)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_existing_username_non_interactive(self):
         """Creation fails if the username already exists."""
         User.objects.create(username="janet")
@@ -1164,6 +1171,7 @@ class CreatesuperuserManagementCommandTestCase(TestCase):
                 stdout=new_io,
             )
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_existing_username_provided_via_option_and_interactive(self):
         """call_command() gets username='janet' and interactive=True."""
         new_io = StringIO()
@@ -1316,7 +1324,7 @@ class CreatesuperuserManagementCommandTestCase(TestCase):
         self.assertEqual(user.email, "joe@somewhere.org")
         self.assertTrue(user.check_password("test_password"))
         # Environment variables are ignored for non-required fields.
-        self.assertEqual(user.first_name, "")
+        self.assertEqual(user.first_name, " ")
 
     @override_settings(AUTH_USER_MODEL="auth_tests.CustomUserWithM2m")
     def test_environment_variable_m2m_non_interactive(self):

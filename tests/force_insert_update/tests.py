@@ -1,5 +1,5 @@
 from django.db import DatabaseError, IntegrityError, models, transaction
-from django.test import TestCase
+from django.test import TestCase, skipUnlessDBFeature
 
 from .models import (
     Counter,
@@ -101,6 +101,7 @@ class ForceInsertInheritanceTests(TestCase):
         with self.assertRaisesMessage(TypeError, msg):
             Counter().save(force_insert=(SubCounter,))
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_force_insert_false(self):
         with self.assertNumQueries(3):
             obj = SubCounter.objects.create(pk=1, value=0)
@@ -117,11 +118,13 @@ class ForceInsertInheritanceTests(TestCase):
         obj.refresh_from_db()
         self.assertEqual(obj.value, 3)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_force_insert_false_with_existing_parent(self):
         parent = Counter.objects.create(pk=1, value=1)
         with self.assertNumQueries(2):
             SubCounter.objects.create(pk=parent.pk, value=2)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_force_insert_parent(self):
         with self.assertNumQueries(3):
             SubCounter(pk=1, value=1).save(force_insert=True)
@@ -131,6 +134,7 @@ class ForceInsertInheritanceTests(TestCase):
         with self.assertNumQueries(2):
             SubCounter(pk=3, value=1).save(force_insert=(models.Model,))
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_force_insert_with_grandparent(self):
         with self.assertNumQueries(4):
             SubSubCounter(pk=1, value=1).save(force_insert=True)
@@ -143,6 +147,7 @@ class ForceInsertInheritanceTests(TestCase):
         with self.assertNumQueries(4):
             SubSubCounter(pk=4, value=1).save(force_insert=(SubCounter,))
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_force_insert_with_existing_grandparent(self):
         # Force insert only the last child.
         grandparent = Counter.objects.create(pk=1, value=1)
@@ -157,6 +162,7 @@ class ForceInsertInheritanceTests(TestCase):
         with self.assertRaises(IntegrityError), transaction.atomic():
             SubSubCounter(pk=grandparent.pk, value=1).save(force_insert=(Counter,))
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_force_insert_diamond_mti(self):
         # Force insert all parents.
         with self.assertNumQueries(4):

@@ -478,6 +478,7 @@ class GenericRelationsTests(TestCase):
         with self.assertRaisesMessage(FieldError, msg):
             TaggedItem.objects.filter(vegetable__isnull=True)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_multiple_gfk(self):
         # Simple tests for multiple GenericForeignKeys
         # only uses one model, since the above tests should be sufficient.
@@ -711,6 +712,7 @@ class GenericRelationsTests(TestCase):
         platypus.tags.remove(weird_tag)
         self.assertSequenceEqual(platypus.tags.all(), [furry_tag])
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_prefetch_related_different_content_types(self):
         TaggedItem.objects.create(content_object=self.platypus, tag="prefetch_tag_1")
         TaggedItem.objects.create(
@@ -729,6 +731,7 @@ class GenericRelationsTests(TestCase):
         for tag in tags:
             self.assertSequenceEqual(tag.content_object.tags.all(), [tag])
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_prefetch_related_custom_object_id(self):
         tiger = Animal.objects.create(common_name="tiger")
         cheetah = Animal.objects.create(common_name="cheetah")

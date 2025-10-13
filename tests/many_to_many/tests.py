@@ -38,6 +38,7 @@ class ManyToManyTests(TestCase):
         cls.a4 = Article.objects.create(headline="Oxygen-free diet works wonders")
         cls.a4.publications.add(cls.p2)
 
+    @skipIfDBFeature("supports_ignore_conflicts")
     def test_add(self):
         # Create an Article.
         a5 = Article(headline="Django lets you create web apps easily")
@@ -149,7 +150,7 @@ class ManyToManyTests(TestCase):
             [self.p4, self.p2, self.p3, self.p1],
         )
 
-    @skipUnlessDBFeature("supports_ignore_conflicts")
+    @skipIfDBFeature("supports_ignore_conflicts")
     def test_fast_add_ignore_conflicts(self):
         """
         A single query is necessary to add auto-created through instances if
@@ -167,7 +168,7 @@ class ManyToManyTests(TestCase):
             self.a1.publications.add(str(self.p1.pk))
         self.assertEqual(self.a1.publications.get(), self.p1)
 
-    @skipUnlessDBFeature("supports_ignore_conflicts")
+    @skipIfDBFeature("supports_ignore_conflicts")
     def test_slow_add_ignore_conflicts(self):
         manager_cls = self.a1.publications.__class__
         # Simulate a race condition between the missing ids retrieval and

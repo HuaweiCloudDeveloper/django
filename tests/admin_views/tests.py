@@ -211,6 +211,7 @@ class AdminViewBasicTestCase(TestCase):
             content="<p>Newest content</p>",
             date=datetime.datetime(2009, 3, 18, 11, 54, 58),
             section=cls.s1,
+            title=" ",
         )
         cls.p1 = PrePopulatedPost.objects.create(
             title="A Long Title", published=True, slug="a-long-title"
@@ -326,6 +327,7 @@ class AdminViewBasicTest(AdminViewBasicTestCase):
             msg_prefix="Couldn't find an input with the right value in the response",
         )
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_add_query_string_persists(self):
         save_options = [
             {"_addanother": "1"},  # "Save and add another".
@@ -747,6 +749,7 @@ class AdminViewBasicTest(AdminViewBasicTestCase):
         self.assertContentBefore(response, link3, link2)
         self.assertContentBefore(response, link2, link1)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_change_list_sorting_model_meta(self):
         # Test ordering on Model Meta is respected
 
@@ -856,6 +859,7 @@ class AdminViewBasicTest(AdminViewBasicTestCase):
         response.context["cl"].list_display = ["id", "name", "state_id"]
         self.assertIs(response.context["cl"].has_related_field_in_list_display(), False)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_has_related_field_in_list_display_o2o(self):
         """Joins shouldn't be performed for <O2O>_id fields in list display."""
         media = Media.objects.create(name="Foo")
@@ -1086,6 +1090,7 @@ class AdminViewBasicTest(AdminViewBasicTestCase):
             html=True,
         )
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_change_list_null_boolean_display(self):
         Post.objects.create(public=None)
         response = self.client.get(reverse("admin:admin_views_post_changelist"))
@@ -1178,6 +1183,7 @@ class AdminViewBasicTest(AdminViewBasicTestCase):
         )
         self.assertEqual(response.status_code, 200)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_disallowed_to_field(self):
         url = reverse("admin:admin_views_section_changelist")
         with self.assertLogs("django.security.DisallowedModelAdminToField", "ERROR"):
@@ -1884,6 +1890,7 @@ class AdminViewFormUrlTest(TestCase):
     current_app = "admin3"
 
     @classmethod
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def setUpTestData(cls):
         cls.superuser = User.objects.create_superuser(
             username="super", password="secret", email="super@example.com"
@@ -2189,6 +2196,7 @@ class AdminViewPermissionsTest(TestCase):
     """Tests for Admin Views Permissions."""
 
     @classmethod
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def setUpTestData(cls):
         cls.superuser = User.objects.create_superuser(
             username="super", password="secret", email="super@example.com"
@@ -3434,6 +3442,7 @@ class AdminViewProxyModelPermissionsTests(TestCase):
     """Tests for proxy models permissions in the admin."""
 
     @classmethod
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def setUpTestData(cls):
         cls.viewuser = User.objects.create_user(
             username="viewuser", password="secret", is_staff=True
@@ -3846,6 +3855,7 @@ class TestGenericRelations(TestCase):
 @override_settings(ROOT_URLCONF="admin_views.urls")
 class AdminViewStringPrimaryKeyTest(TestCase):
     @classmethod
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def setUpTestData(cls):
         cls.superuser = User.objects.create_superuser(
             username="super", password="secret", email="super@example.com"
@@ -4185,6 +4195,7 @@ class AdminViewUnicodeTest(TestCase):
         )
         self.assertEqual(response.status_code, 302)  # redirect somewhere
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_unicode_delete(self):
         """
         The delete_view handles non-ASCII characters
@@ -4200,6 +4211,7 @@ class AdminViewUnicodeTest(TestCase):
 @override_settings(ROOT_URLCONF="admin_views.urls")
 class AdminViewListEditable(TestCase):
     @classmethod
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def setUpTestData(cls):
         cls.superuser = User.objects.create_superuser(
             username="super", password="secret", email="super@example.com"
@@ -4638,6 +4650,7 @@ class AdminViewListEditable(TestCase):
 @override_settings(ROOT_URLCONF="admin_views.urls")
 class AdminSearchTest(TestCase):
     @classmethod
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def setUpTestData(cls):
         cls.superuser = User.objects.create_superuser(
             username="super", password="secret", email="super@example.com"
@@ -6871,6 +6884,7 @@ class ReadonlyTest(AdminFieldExtractionMixin, TestCase):
         self.client.force_login(self.superuser)
 
     @ignore_warnings(category=RemovedInDjango60Warning)
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_readonly_get(self):
         response = self.client.get(reverse("admin:admin_views_post_add"))
         self.assertNotContains(response, 'name="posted"')
@@ -6952,6 +6966,7 @@ class ReadonlyTest(AdminFieldExtractionMixin, TestCase):
         self.assertContains(response, "test<br>link")
 
     @ignore_warnings(category=RemovedInDjango60Warning)
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_readonly_post(self):
         data = {
             "title": "Django Got Readonly Fields",
@@ -6997,6 +7012,7 @@ class ReadonlyTest(AdminFieldExtractionMixin, TestCase):
             response, '<div class="readonly">No opinion</div>', html=True
         )
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def _test_readonly_foreignkey_links(self, admin_site):
         """
         ForeignKey readonly fields render as links if the target model is
@@ -7098,6 +7114,7 @@ class ReadonlyTest(AdminFieldExtractionMixin, TestCase):
         self.assertContains(response, '<div class="readonly">-</div>')
 
     @ignore_warnings(category=RemovedInDjango60Warning)
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_readonly_field_overrides(self):
         """
         Regression test for #22087 - ModelForm Meta overrides are ignored by
@@ -7266,6 +7283,7 @@ class UserAdminTest(TestCase):
     """
 
     @classmethod
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def setUpTestData(cls):
         cls.superuser = User.objects.create_superuser(
             username="super", password="secret", email="super@example.com"
@@ -7528,6 +7546,7 @@ class GroupAdminTest(TestCase):
 @override_settings(ROOT_URLCONF="admin_views.urls")
 class CSSTest(TestCase):
     @classmethod
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def setUpTestData(cls):
         cls.superuser = User.objects.create_superuser(
             username="super", password="secret", email="super@example.com"
@@ -7825,6 +7844,7 @@ class DateHierarchyTests(TestCase):
         self.assertNotContains(response, "release_date__month=")
         self.assertNotContains(response, "release_date__day=")
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_single(self):
         """
         Single day-level date hierarchy appears for single object.
@@ -7836,6 +7856,7 @@ class DateHierarchyTests(TestCase):
         self.assert_contains_day_link(response, DATE)
         self.assert_non_localized_year(response, 2000)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_within_month(self):
         """
         day-level links appear for changelist within single month.
@@ -7853,6 +7874,7 @@ class DateHierarchyTests(TestCase):
             self.assert_contains_day_link(response, date)
         self.assert_non_localized_year(response, 2000)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_within_year(self):
         """
         month-level links appear for changelist within single year.
@@ -7872,6 +7894,7 @@ class DateHierarchyTests(TestCase):
             self.assert_contains_month_link(response, date)
         self.assert_non_localized_year(response, 2000)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_multiple_years(self):
         """
         year-level links appear for year-spanning changelist.
@@ -7913,6 +7936,7 @@ class DateHierarchyTests(TestCase):
             self.assert_non_localized_year(response, 2003)
             self.assert_non_localized_year(response, 2005)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_related_field(self):
         questions_data = (
             # (posted data, number of answers),
@@ -8273,6 +8297,7 @@ class AdminKeepChangeListFiltersTests(TestCase):
         )
         self.assertURLEqual(detail_link[1], self.get_change_url())
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_change_view(self):
         # Get the `change_view`.
         response = self.client.get(self.get_change_url())
@@ -8309,6 +8334,8 @@ class AdminKeepChangeListFiltersTests(TestCase):
         }
 
         post_data["_save"] = 1
+        post_data["first_name"] = " "
+        post_data["last_name"] = " "
         response = self.client.post(self.get_change_url(), data=post_data)
         self.assertRedirects(response, self.get_changelist_url())
         post_data.pop("_save")
@@ -8345,6 +8372,7 @@ class AdminKeepChangeListFiltersTests(TestCase):
         # The action attribute is omitted.
         self.assertContains(response, '<form method="post" id="user_form" novalidate>')
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_add_view(self):
         # Get the `add_view`.
         response = self.client.get(self.get_add_url())
@@ -8394,6 +8422,7 @@ class AdminKeepChangeListFiltersTests(TestCase):
         # The action attribute is omitted.
         self.assertContains(response, '<form method="post" id="user_form" novalidate>')
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_delete_view(self):
         # Test redirect on "Delete".
         response = self.client.post(self.get_delete_url(), {"post": "yes"})

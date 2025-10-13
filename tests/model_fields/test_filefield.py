@@ -10,7 +10,7 @@ from django.core.files import File, temp
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.db import IntegrityError, models
-from django.test import TestCase, override_settings
+from django.test import TestCase, override_settings, skipUnlessDBFeature
 from django.test.utils import isolate_apps
 from django.utils.version import PY311
 
@@ -85,6 +85,7 @@ class FileFieldTests(TestCase):
                 cm.exception.__notes__, ["Pass a 'name' argument to ContentFile."]
             )
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_delete_content_file(self):
         file = ContentFile(b"", name="foo")
         d = Document.objects.create(myfile=file)
@@ -150,6 +151,7 @@ class FileFieldTests(TestCase):
                         True,
                     )
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_pickle(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
             with override_settings(MEDIA_ROOT=Path(tmp_dir)):

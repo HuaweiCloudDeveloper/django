@@ -4,7 +4,7 @@ from django.db import connection
 from django.db.models import CharField, TextField
 from django.db.models import Value as V
 from django.db.models.functions import Concat, ConcatPair, Upper
-from django.test import TestCase
+from django.test import TestCase, skipUnlessDBFeature
 from django.utils import timezone
 
 from ..models import Article, Author
@@ -15,6 +15,7 @@ lorem_ipsum = """
 
 
 class ConcatTests(TestCase):
+    @skipUnlessDBFeature("supports_concat_null_to_empty")
     def test_basic(self):
         Author.objects.create(name="Jayden")
         Author.objects.create(name="John Smith", alias="smithj", goes_by="John")

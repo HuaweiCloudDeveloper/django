@@ -419,6 +419,7 @@ class SerializerDataTests(TestCase):
     pass
 
 
+@skipUnlessDBFeature("supports_datefield_without_time")
 def assert_serializer(self, format, data):
     # Create all the objects defined in the test data.
     objects = []

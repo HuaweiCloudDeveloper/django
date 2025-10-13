@@ -10,7 +10,7 @@ from django.contrib.auth.models import Permission, User
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied
 from django.http import Http404
-from django.test import RequestFactory, override_settings
+from django.test import RequestFactory, override_settings, skipUnlessDBFeature
 from django.urls import reverse, reverse_lazy
 
 from .admin import AnswerAdmin, QuestionAdmin
@@ -87,6 +87,7 @@ class AutocompleteJsonViewTests(AdminViewBasicTestCase):
     url = reverse_lazy("autocomplete_admin:autocomplete")
 
     @classmethod
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def setUpTestData(cls):
         cls.user = User.objects.create_user(
             username="user",

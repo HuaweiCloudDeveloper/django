@@ -12,6 +12,7 @@ from ..models import Article, Author, DecimalModel, Fan
 
 
 class LeastTests(TestCase):
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_basic(self):
         now = timezone.now()
         before = now - timedelta(hours=1)
@@ -21,7 +22,7 @@ class LeastTests(TestCase):
         articles = Article.objects.annotate(first_updated=Least("written", "published"))
         self.assertEqual(articles.first().first_updated, before)
 
-    @skipUnlessDBFeature("greatest_least_ignores_nulls")
+    @skipUnlessDBFeature("greatest_least_ignores_nulls", "supports_default_empty_string_for_not_null")
     def test_ignores_null(self):
         now = timezone.now()
         Article.objects.create(title="Testing with Django", written=now)
@@ -36,6 +37,7 @@ class LeastTests(TestCase):
         articles = Article.objects.annotate(first_updated=Least("written", "published"))
         self.assertIsNone(articles.first().first_updated)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_coalesce_workaround(self):
         future = datetime(2100, 1, 1)
         now = timezone.now()
@@ -62,6 +64,7 @@ class LeastTests(TestCase):
         )
         self.assertEqual(articles.first().last_updated, now)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_all_null(self):
         Article.objects.create(title="Testing with Django", written=timezone.now())
         articles = Article.objects.annotate(first_updated=Least("published", "updated"))

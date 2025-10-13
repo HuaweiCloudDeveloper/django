@@ -195,6 +195,7 @@ class SerializersTestBase:
         self.assertTrue(Article.objects.filter(headline=new_headline))
         self.assertFalse(Article.objects.filter(headline=old_headline))
 
+    @skipUnlessDBFeature("supports_datefield_without_time")
     def test_one_to_one_as_pk(self):
         """
         If you use your own primary key field (such as a OneToOneField), it

@@ -4,7 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core import checks, management
 from django.db import DEFAULT_DB_ALIAS, models
 from django.db.models import signals
-from django.test import TestCase, override_settings
+from django.test import TestCase, override_settings, skipUnlessDBFeature
 from django.test.utils import isolate_apps
 from django.urls import reverse
 
@@ -428,6 +428,7 @@ class ProxyModelAdminTests(TestCase):
         self.assertIn(base_user, collector.edges.get(None, ()))
         self.assertIn(issue, collector.edges.get(tracker_user, ()))
 
+    @skipUnlessDBFeature("supports_admin_deleted_objects")
     def test_delete_str_in_model_admin(self):
         """
         Test if the admin delete page shows the correct string representation

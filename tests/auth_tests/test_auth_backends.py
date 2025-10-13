@@ -28,6 +28,7 @@ from django.test import (
     TestCase,
     modify_settings,
     override_settings,
+    skipUnlessDBFeature,
 )
 from django.urls import reverse
 from django.views.debug import ExceptionReporter, technical_500_response
@@ -542,6 +543,7 @@ class ModelBackendTest(BaseModelBackendTest, TestCase):
         self.assertIsNone(await aauthenticate(**self.user_credentials))
 
     @override_settings(AUTH_USER_MODEL="auth_tests.CustomUserWithoutIsActiveField")
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_authenticate_user_without_is_active_field(self):
         """
         A custom user without an `is_active` field is allowed to authenticate.
@@ -554,6 +556,7 @@ class ModelBackendTest(BaseModelBackendTest, TestCase):
         self.assertEqual(authenticate(username="test", password="test"), user)
 
     @override_settings(AUTH_USER_MODEL="auth_tests.CustomUserWithoutIsActiveField")
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     async def test_aauthenticate_user_without_is_active_field(self):
         """
         A custom user without an `is_active` field is allowed to authenticate.
@@ -629,6 +632,7 @@ class CustomUserModelBackendAuthenticateTest(TestCase):
     custom user model's USERNAME_FIELD.
     """
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_authenticate(self):
         test_user = CustomUser._default_manager.create_user(
             email="test@example.com", password="test", date_of_birth=date(2006, 4, 25)
@@ -636,6 +640,7 @@ class CustomUserModelBackendAuthenticateTest(TestCase):
         authenticated_user = authenticate(email="test@example.com", password="test")
         self.assertEqual(test_user, authenticated_user)
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     async def test_aauthenticate(self):
         test_user = await CustomUser._default_manager.acreate_user(
             email="test@example.com", password="test", date_of_birth=date(2006, 4, 25)
