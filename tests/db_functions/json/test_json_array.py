@@ -106,7 +106,7 @@ class JSONArrayTests(TestCase):
         )
         self.assertQuerySetEqual(qs, Author.objects.order_by("-alias"))
 
-
+@skipIfDBFeature("supports_json_field")
 class JSONArrayNotSupportedTests(TestCase):
     def test_not_supported(self):
         msg = "JSONFields are not supported on this database backend."
