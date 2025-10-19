@@ -383,6 +383,7 @@ class TestQuerying(TestCase):
             [self.objs[0]],
         )
 
+    @skipUnlessDBFeature("supports_json_field_filter_clause")
     def test_ordering_by_transform(self):
         mariadb = connection.vendor == "mysql" and connection.mysql_is_mariadb
         values = [
@@ -407,6 +408,7 @@ class TestQuerying(TestCase):
                     expected = [objs[2], objs[4], objs[3], objs[1], objs[0]]
                 self.assertSequenceEqual(query, expected)
 
+    @skipUnlessDBFeature("supports_json_field_filter_clause")
     def test_ordering_grouping_by_key_transform(self):
         base_qs = NullableJSONModel.objects.filter(value__d__0__isnull=False)
         for qs in (
@@ -428,6 +430,7 @@ class TestQuerying(TestCase):
             operator.itemgetter("key", "count"),
         )
 
+    @skipUnlessDBFeature("supports_json_field_filter_clause")
     def test_ordering_grouping_by_count(self):
         qs = (
             NullableJSONModel.objects.filter(
@@ -439,6 +442,7 @@ class TestQuerying(TestCase):
         )
         self.assertQuerySetEqual(qs, [0, 1], operator.itemgetter("count"))
 
+    @skipUnlessDBFeature("supports_json_field_filter_clause")
     def test_order_grouping_custom_decoder(self):
         NullableJSONModel.objects.create(value_custom={"a": "b"})
         qs = NullableJSONModel.objects.filter(value_custom__isnull=False)
@@ -453,6 +457,7 @@ class TestQuerying(TestCase):
             [{"value_custom__a": "b", "count": 1}],
         )
 
+    @skipUnlessDBFeature("supports_json_field_key_lookup")
     def test_key_transform_raw_expression(self):
         expr = RawSQL(self.raw_sql, ['{"x": "bar"}'])
         self.assertSequenceEqual(
@@ -460,6 +465,7 @@ class TestQuerying(TestCase):
             [self.objs[7]],
         )
 
+    @skipUnlessDBFeature("supports_json_nested_key")
     def test_nested_key_transform_raw_expression(self):
         expr = RawSQL(self.raw_sql, ['{"x": {"y": "bar"}}'])
         self.assertSequenceEqual(
@@ -469,6 +475,7 @@ class TestQuerying(TestCase):
             [self.objs[7]],
         )
 
+    @skipUnlessDBFeature("supports_json_field_key_lookup")
     def test_key_transform_expression(self):
         self.assertSequenceEqual(
             NullableJSONModel.objects.filter(value__d__0__isnull=False)
@@ -481,6 +488,7 @@ class TestQuerying(TestCase):
             [self.objs[4]],
         )
 
+    @skipUnlessDBFeature("supports_json_field_key_lookup")
     def test_key_transform_annotation_expression(self):
         obj = NullableJSONModel.objects.create(value={"d": ["e", "e"]})
         self.assertSequenceEqual(
@@ -494,6 +502,7 @@ class TestQuerying(TestCase):
             [obj],
         )
 
+    @skipUnlessDBFeature("supports_json_field_key_lookup")
     def test_nested_key_transform_expression(self):
         self.assertSequenceEqual(
             NullableJSONModel.objects.filter(value__d__0__isnull=False)
@@ -508,6 +517,7 @@ class TestQuerying(TestCase):
             [self.objs[4]],
         )
 
+    @skipUnlessDBFeature("supports_json_nested_key")
     def test_nested_key_transform_annotation_expression(self):
         obj = NullableJSONModel.objects.create(
             value={"d": ["e", {"f": "g"}, {"f": "g"}]},
@@ -523,6 +533,7 @@ class TestQuerying(TestCase):
             [obj],
         )
 
+    @skipUnlessDBFeature("supports_json_nested_key")
     def test_nested_key_transform_on_subquery(self):
         self.assertSequenceEqual(
             NullableJSONModel.objects.filter(value__d__0__isnull=False)
@@ -537,6 +548,7 @@ class TestQuerying(TestCase):
             [self.objs[4]],
         )
 
+    @skipUnlessDBFeature("supports_json_field_key_lookup")
     def test_key_text_transform_char_lookup(self):
         qs = NullableJSONModel.objects.annotate(
             char_value=KeyTextTransform("foo", "value"),
@@ -548,6 +560,7 @@ class TestQuerying(TestCase):
         ).filter(char_value__startswith="bar")
         self.assertSequenceEqual(qs, [self.objs[7]])
 
+    @skipUnlessDBFeature("supports_json_field_key_lookup")
     def test_expression_wrapper_key_transform(self):
         self.assertCountEqual(
             NullableJSONModel.objects.annotate(
@@ -571,6 +584,7 @@ class TestQuerying(TestCase):
             [self.objs[4]],
         )
 
+    @skipUnlessDBFeature("supports_json_field_key_lookup")
     def test_has_key_deep(self):
         tests = [
             (Q(value__baz__has_key="a"), self.objs[7]),
@@ -610,6 +624,7 @@ class TestQuerying(TestCase):
             self.objs,
         )
 
+    @skipUnlessDBFeature("supports_json_field_key_lookup")
     def test_has_key_list(self):
         obj = NullableJSONModel.objects.create(value=[{"a": 1}, {"b": "x"}])
         tests = [
@@ -637,6 +652,7 @@ class TestQuerying(TestCase):
             [self.objs[3], self.objs[4], self.objs[6]],
         )
 
+    @skipUnlessDBFeature("supports_json_nested_key")
     def test_has_key_number(self):
         obj = NullableJSONModel.objects.create(
             value={
@@ -696,7 +712,6 @@ class TestQuerying(TestCase):
 
     @skipUnlessDBFeature(
         "supports_primitives_in_json_field",
-        "supports_json_field_contains",
     )
     def test_contains_primitives(self):
         for value in self.primitives:
@@ -711,12 +726,14 @@ class TestQuerying(TestCase):
         )
         self.assertCountEqual(qs, self.objs[2:4])
 
-    @skipIfDBFeature("supports_json_field_contains")
+    @skipUnlessDBFeature("supports_json_field_contains")
+    @skipUnlessDBFeature("supports_json_field_key_lookup")
     def test_contained_by_unsupported(self):
         msg = "contained_by lookup is not supported on this database backend."
         with self.assertRaisesMessage(NotSupportedError, msg):
             NullableJSONModel.objects.filter(value__contained_by={"a": "b"}).get()
 
+    @skipUnlessDBFeature("supports_json_field_key_lookup")
     def test_deep_values(self):
         qs = NullableJSONModel.objects.values_list("value__k__l").order_by("pk")
         expected_objs = [(None,)] * len(self.objs)
@@ -724,6 +741,7 @@ class TestQuerying(TestCase):
         self.assertSequenceEqual(qs, expected_objs)
 
     @skipUnlessDBFeature("can_distinct_on_fields")
+    @skipUnlessDBFeature("supports_json_field_key_lookup")
     def test_deep_distinct(self):
         query = NullableJSONModel.objects.distinct("value__k__l").values_list(
             "value__k__l"
@@ -733,6 +751,7 @@ class TestQuerying(TestCase):
             expected.reverse()
         self.assertSequenceEqual(query, expected)
 
+    @skipUnlessDBFeature("supports_json_field_key_lookup")
     def test_isnull_key(self):
         # key__isnull=False works the same as has_key='key'.
         self.assertCountEqual(
@@ -752,6 +771,7 @@ class TestQuerying(TestCase):
             [self.objs[4]],
         )
 
+    @skipUnlessDBFeature("supports_json_field_key_lookup")
     def test_isnull_key_or_none(self):
         obj = NullableJSONModel.objects.create(value={"a": None})
         self.assertCountEqual(
@@ -761,12 +781,14 @@ class TestQuerying(TestCase):
             self.objs[:3] + self.objs[5:] + [obj],
         )
 
+    @skipUnlessDBFeature("supports_json_field_key_lookup")
     def test_none_key(self):
         self.assertSequenceEqual(
             NullableJSONModel.objects.filter(value__j=None),
             [self.objs[4]],
         )
 
+    @skipUnlessDBFeature("supports_json_field_key_lookup")
     def test_none_key_exclude(self):
         obj = NullableJSONModel.objects.create(value={"j": 1})
         if connection.vendor == "oracle":
@@ -781,18 +803,21 @@ class TestQuerying(TestCase):
                 NullableJSONModel.objects.exclude(value__j=None), [obj]
             )
 
+    @skipUnlessDBFeature("supports_json_field_filter_clause")
     def test_shallow_list_lookup(self):
         self.assertSequenceEqual(
             NullableJSONModel.objects.filter(value__0=1),
             [self.objs[5]],
         )
 
+    @skipUnlessDBFeature("supports_json_field_filter_clause")
     def test_shallow_obj_lookup(self):
         self.assertCountEqual(
             NullableJSONModel.objects.filter(value__a="b"),
             [self.objs[3], self.objs[4]],
         )
 
+    @skipUnlessDBFeature("supports_json_field_filter_clause")
     def test_obj_subquery_lookup(self):
         qs = NullableJSONModel.objects.annotate(
             field=Subquery(
@@ -801,30 +826,35 @@ class TestQuerying(TestCase):
         ).filter(field__a="b")
         self.assertCountEqual(qs, [self.objs[3], self.objs[4]])
 
+    @skipUnlessDBFeature("supports_json_field_key_lookup")
     def test_deep_lookup_objs(self):
         self.assertSequenceEqual(
             NullableJSONModel.objects.filter(value__k__l="m"),
             [self.objs[4]],
         )
 
+    @skipUnlessDBFeature("supports_json_field_filter_clause")
     def test_shallow_lookup_obj_target(self):
         self.assertSequenceEqual(
             NullableJSONModel.objects.filter(value__k={"l": "m"}),
             [self.objs[4]],
         )
 
+    @skipUnlessDBFeature("supports_json_field_key_lookup")
     def test_deep_lookup_array(self):
         self.assertSequenceEqual(
             NullableJSONModel.objects.filter(value__1__0=2),
             [self.objs[5]],
         )
 
+    @skipUnlessDBFeature("supports_json_field_key_lookup")
     def test_deep_lookup_mixed(self):
         self.assertSequenceEqual(
             NullableJSONModel.objects.filter(value__d__1__f="g"),
             [self.objs[4]],
         )
 
+    @skipUnlessDBFeature("supports_json_field_key_lookup")
     def test_deep_lookup_transform(self):
         self.assertCountEqual(
             NullableJSONModel.objects.filter(value__c__gt=2),
@@ -836,6 +866,7 @@ class TestQuerying(TestCase):
         )
         self.assertIs(NullableJSONModel.objects.filter(value__c__lt=5).exists(), False)
 
+    @skipUnlessDBFeature("supports_json_field_filter_clause")
     def test_lookups_special_chars(self):
         test_keys = [
             "CONTROL",
@@ -868,6 +899,7 @@ class TestQuerying(TestCase):
                 with self.subTest(key=key, lookup=lookup):
                     self.assertSequenceEqual(results, [obj])
 
+    @skipUnlessDBFeature("supports_json_field_key_lookup")
     def test_lookups_special_chars_double_quotes(self):
         test_keys = [
             'double"',
@@ -889,6 +921,7 @@ class TestQuerying(TestCase):
                 )
                 self.assertSequenceEqual(results, [obj])
 
+    @skipUnlessDBFeature("supports_json_field_filter_clause")
     def test_lookup_exclude(self):
         tests = [
             (Q(value__a="b"), [self.objs[0]]),
@@ -904,6 +937,7 @@ class TestQuerying(TestCase):
                 expected,
             )
 
+    @skipUnlessDBFeature("supports_json_field_filter_clause")
     def test_lookup_exclude_nonexistent_key(self):
         # Values without the key are ignored.
         condition = Q(value__foo="bax")
@@ -935,6 +969,7 @@ class TestQuerying(TestCase):
             objs_with_value,
         )
 
+    @skipUnlessDBFeature("supports_json_field_in_subquery")
     def test_usage_in_subquery(self):
         self.assertCountEqual(
             NullableJSONModel.objects.filter(
@@ -944,6 +979,7 @@ class TestQuerying(TestCase):
         )
 
     @skipUnlessDBFeature("supports_json_field_contains")
+    @skipUnlessDBFeature("supports_json_field_key_lookup")
     def test_array_key_contains(self):
         tests = [
             ([], [self.objs[7]]),
@@ -958,6 +994,7 @@ class TestQuerying(TestCase):
                     expected,
                 )
 
+    @skipUnlessDBFeature("supports_json_field_key_lookup")
     def test_key_iexact(self):
         self.assertIs(
             NullableJSONModel.objects.filter(value__foo__iexact="BaR").exists(), True
@@ -966,6 +1003,7 @@ class TestQuerying(TestCase):
             NullableJSONModel.objects.filter(value__foo__iexact='"BaR"').exists(), False
         )
 
+    @skipUnlessDBFeature("supports_json_field_key_lookup")
     def test_key_in(self):
         tests = [
             ("value__c__in", [14], self.objs[3:5]),
@@ -999,6 +1037,7 @@ class TestQuerying(TestCase):
                     expected,
                 )
 
+    @skipUnlessDBFeature("supports_json_field_key_lookup")
     def test_key_values(self):
         qs = NullableJSONModel.objects.filter(value__h=True)
         tests = [
@@ -1017,6 +1056,7 @@ class TestQuerying(TestCase):
             with self.subTest(lookup=lookup):
                 self.assertEqual(qs.values_list(lookup, flat=True).get(), expected)
 
+    @skipUnlessDBFeature("supports_json_field_key_lookup")
     def test_key_values_boolean(self):
         qs = NullableJSONModel.objects.filter(value__h=True, value__i=False)
         tests = [
@@ -1028,6 +1068,7 @@ class TestQuerying(TestCase):
                 self.assertIs(qs.values_list(lookup, flat=True).get(), expected)
 
     @skipUnlessDBFeature("supports_json_field_contains")
+    @skipUnlessDBFeature("supports_json_field_key_lookup")
     def test_key_contains(self):
         self.assertIs(
             NullableJSONModel.objects.filter(value__foo__contains="ar").exists(), False
@@ -1036,41 +1077,49 @@ class TestQuerying(TestCase):
             NullableJSONModel.objects.filter(value__foo__contains="bar").exists(), True
         )
 
+    @skipUnlessDBFeature("supports_json_field_key_lookup")
     def test_key_icontains(self):
         self.assertIs(
             NullableJSONModel.objects.filter(value__foo__icontains="Ar").exists(), True
         )
 
+    @skipUnlessDBFeature("supports_json_field_key_lookup")
     def test_key_startswith(self):
         self.assertIs(
             NullableJSONModel.objects.filter(value__foo__startswith="b").exists(), True
         )
 
+    @skipUnlessDBFeature("supports_json_field_key_lookup")
     def test_key_istartswith(self):
         self.assertIs(
             NullableJSONModel.objects.filter(value__foo__istartswith="B").exists(), True
         )
 
+    @skipUnlessDBFeature("supports_json_field_key_lookup")
     def test_key_endswith(self):
         self.assertIs(
             NullableJSONModel.objects.filter(value__foo__endswith="r").exists(), True
         )
 
+    @skipUnlessDBFeature("supports_json_field_key_lookup")
     def test_key_iendswith(self):
         self.assertIs(
             NullableJSONModel.objects.filter(value__foo__iendswith="R").exists(), True
         )
 
+    @skipUnlessDBFeature("supports_json_field_key_lookup")
     def test_key_regex(self):
         self.assertIs(
             NullableJSONModel.objects.filter(value__foo__regex=r"^bar$").exists(), True
         )
 
+    @skipUnlessDBFeature("supports_json_field_key_lookup")
     def test_key_iregex(self):
         self.assertIs(
             NullableJSONModel.objects.filter(value__foo__iregex=r"^bAr$").exists(), True
         )
 
+    @skipUnlessDBFeature("supports_json_field_key_lookup")
     def test_key_quoted_string(self):
         self.assertEqual(
             NullableJSONModel.objects.filter(value__o='"quoted"').get(),
@@ -1078,6 +1127,7 @@ class TestQuerying(TestCase):
         )
 
     @skipUnlessDBFeature("has_json_operators")
+    @skipUnlessDBFeature("supports_json_field_key_lookup")
     def test_key_sql_injection(self):
         with CaptureQueriesContext(connection) as queries:
             self.assertIs(
@@ -1105,18 +1155,21 @@ class TestQuerying(TestCase):
         self.assertIn('"test\\"', query)
         self.assertIn('\\"d', query)
 
+    @skipUnlessDBFeature("supports_json_field_key_lookup")
     def test_key_escape(self):
         obj = NullableJSONModel.objects.create(value={"%total": 10})
         self.assertEqual(
             NullableJSONModel.objects.filter(**{"value__%total": 10}).get(), obj
         )
 
+    @skipUnlessDBFeature("supports_json_field_key_lookup")
     def test_none_key_and_exact_lookup(self):
         self.assertSequenceEqual(
             NullableJSONModel.objects.filter(value__a="b", value__j=None),
             [self.objs[4]],
         )
 
+    @skipUnlessDBFeature("supports_json_field_key_lookup")
     def test_lookups_with_key_transform(self):
         tests = (
             ("value__baz__has_key", "c"),
@@ -1134,6 +1187,7 @@ class TestQuerying(TestCase):
                 )
 
     @skipUnlessDBFeature("supports_json_field_contains")
+    @skipUnlessDBFeature("supports_json_field_key_lookup")
     def test_contains_contained_by_with_key_transform(self):
         tests = [
             ("value__d__contains", "e"),
@@ -1166,6 +1220,7 @@ class TestQuerying(TestCase):
                     True,
                 )
 
+    @skipUnlessDBFeature("supports_json_field_key_lookup")
     def test_join_key_transform_annotation_expression(self):
         related_obj = RelatedJSONModel.objects.create(
             value={"d": ["f", "e"]},
@@ -1185,6 +1240,7 @@ class TestQuerying(TestCase):
             [related_obj],
         )
 
+    @skipUnlessDBFeature("supports_json_field_key_lookup")
     def test_key_text_transform_from_lookup(self):
         qs = NullableJSONModel.objects.annotate(b=KT("value__bax__foo")).filter(
             b__contains="ar",
@@ -1202,6 +1258,7 @@ class TestQuerying(TestCase):
         with self.assertRaisesMessage(ValueError, msg):
             KT("")
 
+    @skipUnlessDBFeature("supports_json_field_filter_clause")
     def test_literal_annotation_filtering(self):
         all_objects = NullableJSONModel.objects.order_by("id")
         qs = all_objects.annotate(data=Value({"foo": "bar"}, JSONField())).filter(
