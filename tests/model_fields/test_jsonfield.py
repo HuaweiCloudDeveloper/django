@@ -712,6 +712,7 @@ class TestQuerying(TestCase):
 
     @skipUnlessDBFeature(
         "supports_primitives_in_json_field",
+        "supports_json_field_contains",
     )
     def test_contains_primitives(self):
         for value in self.primitives:
