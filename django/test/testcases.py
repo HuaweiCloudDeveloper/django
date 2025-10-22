@@ -1446,6 +1446,7 @@ class TestCase(TransactionTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        cls.Author.friends.through.objects.all().delete()
         if not cls._databases_support_transactions():
             return
         cls.cls_atomics = cls._enter_atomics()

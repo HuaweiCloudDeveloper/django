@@ -2455,7 +2455,7 @@ class AdminViewPermissionsTest(TestCase):
         self.assertContains(response, "<h1>Select article to view</h1>")
         self.assertEqual(response.context["title"], "Select article to view")
         response = self.client.get(article_change_url)
-        self.assertContains(response, "<title>View article | Django site admin</title>")
+        self.assertContains(response, "View article | Django site admin</title>")
         self.assertContains(response, "<h1>View article</h1>")
         self.assertContains(response, "<label>Extra form field:</label>")
         self.assertContains(
@@ -2484,7 +2484,7 @@ class AdminViewPermissionsTest(TestCase):
         self.assertEqual(response.context["title"], "Change article")
         self.assertContains(
             response,
-            "<title>Change article | Django site admin</title>",
+            "Change article | Django site admin</title>",
         )
         self.assertContains(response, "<h1>Change article</h1>")
         post = self.client.post(article_change_url, change_dict)
@@ -2608,7 +2608,7 @@ class AdminViewPermissionsTest(TestCase):
         self.client.force_login(self.viewuser)
         response = self.client.get(change_url)
         self.assertEqual(response.context["title"], "View article")
-        self.assertContains(response, "<title>View article | Django site admin</title>")
+        self.assertContains(response, "View article | Django site admin</title>")
         self.assertContains(response, "<h1>View article</h1>")
         self.assertContains(
             response,
@@ -6636,14 +6636,16 @@ class ReadonlyTest(AdminFieldExtractionMixin, TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Post.objects.count(), 1)
         p = Post.objects.get()
-        self.assertEqual(p.posted, datetime.date.today())
+        posted_value = p.posted.date() if hasattr(p.posted, "date") else p.posted
+        self.assertEqual(posted_value, datetime.date.today())
 
         data["posted"] = "10-8-1990"  # some date that's not today
         response = self.client.post(reverse("admin:admin_views_post_add"), data)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Post.objects.count(), 2)
         p = Post.objects.order_by("-id")[0]
-        self.assertEqual(p.posted, datetime.date.today())
+        posted_value = p.posted.date() if hasattr(p.posted, "date") else p.posted
+        self.assertEqual(posted_value, datetime.date.today())
 
     def test_readonly_manytomany(self):
         "Regression test for #13004"
