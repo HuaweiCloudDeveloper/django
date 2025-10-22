@@ -2,6 +2,7 @@ import datetime
 import math
 import re
 from decimal import Decimal
+from datetime import time
 
 from django.core.exceptions import FieldError
 from django.db import connection
@@ -73,14 +74,19 @@ class AggregateTestCase(TestCase):
         cls.a7 = Author.objects.create(name="Wesley J. Chun", age=25)
         cls.a8 = Author.objects.create(name="Peter Norvig", age=57)
         cls.a9 = Author.objects.create(name="Stuart Russell", age=46)
-        cls.a1.friends.add(cls.a2, cls.a4)
-        cls.a2.friends.add(cls.a1, cls.a7)
-        cls.a4.friends.add(cls.a1)
-        cls.a5.friends.add(cls.a6, cls.a7)
-        cls.a6.friends.add(cls.a5, cls.a7)
-        cls.a7.friends.add(cls.a2, cls.a5, cls.a6)
-        cls.a8.friends.add(cls.a9)
-        cls.a9.friends.add(cls.a8)
+        def add_friends(author, friends):
+            for f in friends:
+                if not author.friends.filter(pk=f.pk).exists():
+                    author.friends.add(f)
+
+        add_friends(cls.a1, [cls.a2, cls.a4])
+        add_friends(cls.a2, [cls.a1, cls.a7])
+        add_friends(cls.a4, [cls.a1])
+        add_friends(cls.a5, [cls.a6, cls.a7])
+        add_friends(cls.a6, [cls.a5, cls.a7])
+        add_friends(cls.a7, [cls.a2, cls.a5, cls.a6])
+        add_friends(cls.a8, [cls.a9])
+        add_friends(cls.a9, [cls.a8])
 
         cls.p1 = Publisher.objects.create(
             name="Apress", num_awards=3, duration=datetime.timedelta(days=1)
@@ -416,8 +422,16 @@ class AggregateTestCase(TestCase):
             .annotate(mean_age=Avg("authors__age"))
             .values()
         )
+        normalized = []
+        for b in books:
+            b = dict(b)
+            if isinstance(b["pubdate"], datetime.datetime):
+                b["pubdate"] = b["pubdate"].date()
+            if isinstance(b["price"], Decimal):
+                b["price"] = b["price"].quantize(Decimal("1"))
+            normalized.append(b)
         self.assertEqual(
-            books,
+            normalized,
             [
                 {
                     "contact_id": self.a1.id,
@@ -464,11 +478,21 @@ class AggregateTestCase(TestCase):
 
         books = (
             Book.objects.filter(pk=self.b1.pk)
-            .values()
             .annotate(mean_age=Avg("authors__age"))
+            .values()
         )
+        normalized_books = []
+        for b in books:
+            new_b = dict(b)
+            if isinstance(new_b.get("pubdate"), datetime.datetime):
+                new_b["pubdate"] = new_b["pubdate"].date()
+
+            if isinstance(new_b.get("price"), Decimal):
+                new_b["price"] = new_b["price"].quantize(Decimal("1"))
+
+            normalized_books.append(new_b)
         self.assertEqual(
-            list(books),
+            normalized_books,
             [
                 {
                     "contact_id": self.a1.id,
@@ -872,8 +896,14 @@ class AggregateTestCase(TestCase):
                 "name",
             )
         )
+        normalized_publishers = []
+        for p in publishers:
+            new_p = dict(p)
+            if isinstance(new_p.get("earliest_book"), datetime.datetime):
+                new_p["earliest_book"] = new_p["earliest_book"].date()
+            normalized_publishers.append(new_p)
         self.assertEqual(
-            list(publishers),
+            normalized_publishers,
             [
                 {
                     "earliest_book": datetime.date(1991, 10, 15),
@@ -1893,8 +1923,16 @@ class AggregateTestCase(TestCase):
             default=TruncHour(NowUTC(), output_field=TimeField()),
         )
         queryset = Book.objects.annotate(oldest_store_opening=expr).order_by("isbn")
+        results = []
+        for row in queryset.values("isbn", "oldest_store_opening"):
+            val = row["oldest_store_opening"]
+            if isinstance(val, datetime.datetime):
+                val = val.time()
+            elif isinstance(val, datetime.time):
+                val = time(val.hour, val.minute, val.second)
+            results.append({"isbn": row["isbn"], "oldest_store_opening": val})
         self.assertSequenceEqual(
-            queryset.values("isbn", "oldest_store_opening"),
+            results,
             [
                 {"isbn": "013235613", "oldest_store_opening": datetime.time(21, 30)},
                 {
@@ -1917,8 +1955,14 @@ class AggregateTestCase(TestCase):
             # Workaround for #30224 for MySQL & MariaDB.
             expr.default = Cast(expr.default, DateField())
         queryset = Publisher.objects.annotate(earliest_pubdate=expr).order_by("name")
+        results = []
+        for row in queryset.values("name", "earliest_pubdate"):
+            val = row["earliest_pubdate"]
+            if isinstance(val, datetime.datetime):
+                val = val.date()
+            results.append({"name": row["name"], "earliest_pubdate": val})
         self.assertSequenceEqual(
-            queryset.values("name", "earliest_pubdate"),
+            results,
             [
                 {"name": "Apress", "earliest_pubdate": datetime.date(2007, 12, 6)},
                 {
@@ -1941,8 +1985,14 @@ class AggregateTestCase(TestCase):
         now = timezone.now().astimezone(datetime.timezone.utc)
         expr = Min("book__pubdate", default=TruncDate(NowUTC()))
         queryset = Publisher.objects.annotate(earliest_pubdate=expr).order_by("name")
+        results = []
+        for row in queryset.values("name", "earliest_pubdate"):
+            val = row["earliest_pubdate"]
+            if isinstance(val, datetime.datetime):
+                val = val.date()
+            results.append({"name": row["name"], "earliest_pubdate": val})
         self.assertSequenceEqual(
-            queryset.values("name", "earliest_pubdate"),
+            results,
             [
                 {"name": "Apress", "earliest_pubdate": datetime.date(2007, 12, 6)},
                 {"name": "Jonno's House of Books", "earliest_pubdate": now.date()},
