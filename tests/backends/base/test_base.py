@@ -13,7 +13,7 @@ from django.test.utils import CaptureQueriesContext, override_settings
 from ..models import Person, Square
 
 
-class DatabaseWrapperTests(SimpleTestCase):
+class DatabaseWrapperTests(TestCase):
     def test_repr(self):
         conn = connections[DEFAULT_DB_ALIAS]
         self.assertEqual(
