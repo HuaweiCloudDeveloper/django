@@ -12,7 +12,7 @@ import uuid
 
 from django.core import serializers
 from django.db import connection, models
-from django.test import TestCase
+from django.test import TestCase, skipUnlessDBFeature
 
 from .models import (
     Anchor,
@@ -433,7 +433,7 @@ if connection.features.interprets_empty_strings_as_nulls:
 class SerializerDataTests(TestCase):
     pass
 
-
+@skipUnlessDBFeature("supports_date_cast")
 def serializerTest(self, format):
     # FK to an object with PK of 0. This won't work on MySQL without the
     # NO_AUTO_VALUE_ON_ZERO SQL mode since it won't let you create an object

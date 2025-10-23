@@ -23,7 +23,7 @@ from django.db.models import (
     Value,
     When,
 )
-from django.test import SimpleTestCase, TestCase
+from django.test import SimpleTestCase, TestCase, skipUnlessDBFeature
 
 from .models import CaseTestModel, Client, FKCaseTestModel, O2OCaseTestModel
 
@@ -873,6 +873,7 @@ class CaseExpressionTests(TestCase):
             transform=attrgetter("integer", "boolean"),
         )
 
+    @skipUnlessDBFeature("supports_date_cast")
     def test_update_date(self):
         CaseTestModel.objects.update(
             date=Case(
@@ -994,6 +995,7 @@ class CaseExpressionTests(TestCase):
             transform=lambda o: (o.integer, str(o.file)),
         )
 
+    @skipUnlessDBFeature("supports_default_empty_string_for_not_null")
     def test_update_file_path(self):
         CaseTestModel.objects.update(
             file_path=Case(

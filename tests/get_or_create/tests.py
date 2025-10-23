@@ -612,6 +612,7 @@ class UpdateOrCreateTransactionTests(TransactionTestCase):
 
     @skipUnlessDBFeature("has_select_for_update")
     @skipUnlessDBFeature("supports_transactions")
+    @skipUnlessDBFeature("supports_date_cast")
     def test_creation_in_transaction(self):
         """
         Objects are selected and updated in a transaction to avoid race

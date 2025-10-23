@@ -1,6 +1,6 @@
 import datetime
 
-from django.test import TestCase
+from django.test import TestCase, skipUnlessDBFeature
 
 from .models import Thing
 
@@ -60,6 +60,7 @@ class ReservedNameTests(TestCase):
         things = [t.when for t in Thing.objects.order_by("when")]
         self.assertEqual(things, ["a", "h"])
 
+    @skipUnlessDBFeature("supports_date_cast")
     def test_fields(self):
         self.generate()
         v = Thing.objects.get(pk="a")

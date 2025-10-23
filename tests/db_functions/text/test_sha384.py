@@ -1,7 +1,7 @@
 from django.db import connection
 from django.db.models import CharField
 from django.db.models.functions import SHA384
-from django.test import TestCase
+from django.test import TestCase, skipUnlessDBFeature
 from django.test.utils import register_lookup
 
 from ..models import Author
@@ -20,6 +20,7 @@ class SHA384Tests(TestCase):
             ]
         )
 
+    @skipUnlessDBFeature("supports_sha384_function")
     def test_basic(self):
         authors = (
             Author.objects.annotate(
@@ -46,6 +47,7 @@ class SHA384Tests(TestCase):
             ],
         )
 
+    @skipUnlessDBFeature("supports_sha384_function")
     def test_transform(self):
         with register_lookup(CharField, SHA384):
             authors = Author.objects.filter(

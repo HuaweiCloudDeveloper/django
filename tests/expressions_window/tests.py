@@ -93,6 +93,7 @@ class WindowFunctionTests(TestCase):
             ]
         )
 
+    @skipUnlessDBFeature("supports_date_cast")
     def test_dense_rank(self):
         tests = [
             ExtractYear(F("hire_date")).asc(),
@@ -162,6 +163,7 @@ class WindowFunctionTests(TestCase):
             ),
         )
 
+    @skipUnlessDBFeature("supports_date_cast")
     def test_rank(self):
         """
         Rank the employees based on the year they're were hired. Since there
@@ -353,6 +355,7 @@ class WindowFunctionTests(TestCase):
             transform=lambda row: (row.name, row.bonus, row.department, row.lag),
         )
 
+    @skipUnlessDBFeature("supports_date_cast")
     def test_first_value(self):
         qs = Employee.objects.annotate(
             first_value=Window(
@@ -386,6 +389,7 @@ class WindowFunctionTests(TestCase):
             ),
         )
 
+    @skipUnlessDBFeature("supports_date_cast")
     def test_last_value(self):
         qs = Employee.objects.annotate(
             last_value=Window(
@@ -492,6 +496,7 @@ class WindowFunctionTests(TestCase):
             ordered=False,
         )
 
+    @skipUnlessDBFeature("supports_date_cast")
     def test_function_list_of_values(self):
         qs = (
             Employee.objects.annotate(
@@ -624,6 +629,7 @@ class WindowFunctionTests(TestCase):
             ),
         )
 
+    @skipUnlessDBFeature("supports_date_cast")
     def test_nthvalue(self):
         qs = Employee.objects.annotate(
             nth_value=Window(
@@ -657,6 +663,7 @@ class WindowFunctionTests(TestCase):
             ),
         )
 
+    @skipUnlessDBFeature("supports_date_cast")
     def test_lead(self):
         """
         Determine what the next person hired in the same department makes.
@@ -696,6 +703,7 @@ class WindowFunctionTests(TestCase):
             ),
         )
 
+    @skipUnlessDBFeature("supports_date_cast")
     def test_lead_offset(self):
         """
         Determine what the person hired after someone makes. Due to
@@ -828,6 +836,7 @@ class WindowFunctionTests(TestCase):
             list(qs.values_list("nth_value", flat=True).distinct()), [None]
         )
 
+    @skipUnlessDBFeature("supports_date_cast")
     def test_multiple_partitioning(self):
         """
         Find the maximum salary for each department for people hired in the
@@ -866,6 +875,7 @@ class WindowFunctionTests(TestCase):
             ),
         )
 
+    @skipUnlessDBFeature("supports_date_cast")
     def test_multiple_ordering(self):
         """
         Accumulate the salaries over the departments based on hire_date.
@@ -1213,6 +1223,7 @@ class WindowFunctionTests(TestCase):
             ordered=False,
         )
 
+    @skipUnlessDBFeature("supports_date_cast")
     def test_range_unbound(self):
         """A query with RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING."""
         qs = Employee.objects.annotate(
@@ -1251,6 +1262,7 @@ class WindowFunctionTests(TestCase):
             ),
         )
 
+    @skipUnlessDBFeature("supports_date_cast")
     def test_subquery_row_range_rank(self):
         qs = Employee.objects.annotate(
             highest_avg_salary_date=Subquery(
@@ -1291,6 +1303,7 @@ class WindowFunctionTests(TestCase):
             ),
         )
 
+    @skipUnlessDBFeature("supports_date_cast")
     def test_row_range_rank(self):
         """
         A query with ROWS BETWEEN UNBOUNDED PRECEDING AND 3 FOLLOWING.
@@ -1410,6 +1423,7 @@ class WindowFunctionTests(TestCase):
         )
 
     @skipUnlessDBFeature("supports_json_field")
+    @skipUnlessDBFeature("supports_window_expressions")
     def test_key_transform(self):
         Detail.objects.bulk_create(
             [

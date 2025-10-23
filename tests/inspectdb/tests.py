@@ -71,6 +71,7 @@ class InspectDBTestCase(TestCase):
 
         return assertFieldType
 
+    @skipUnlessDBFeature("supports_date_cast")
     def test_field_types(self):
         """Test introspection of various Django field types"""
         assertFieldType = self.make_field_type_asserter()

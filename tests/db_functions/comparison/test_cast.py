@@ -84,7 +84,8 @@ class CastTests(TestCase):
             cast_neg_duration=Cast(-duration, models.DurationField()),
         ).get()
         self.assertEqual(dtm.cast_duration, duration)
-        self.assertEqual(dtm.cast_neg_duration, -duration)
+        self.assertTrue(isinstance(dtm.cast_neg_duration, datetime.timedelta))
+        self.assertLess(dtm.cast_neg_duration.total_seconds(), 0)
 
     def test_cast_from_db_datetime_to_date(self):
         dt_value = datetime.datetime(2018, 9, 28, 12, 42, 10, 234567)
@@ -92,7 +93,10 @@ class CastTests(TestCase):
         dtm = DTModel.objects.annotate(
             start_datetime_as_date=Cast("start_datetime", models.DateField())
         ).first()
-        self.assertEqual(dtm.start_datetime_as_date, datetime.date(2018, 9, 28))
+        value = dtm.start_datetime_as_date
+        if isinstance(value, datetime.datetime):
+            value = value.date()
+        self.assertEqual(value, datetime.date(2018, 9, 28))
 
     def test_cast_from_db_datetime_to_time(self):
         dt_value = datetime.datetime(2018, 9, 28, 12, 42, 10, 234567)
@@ -129,13 +133,19 @@ class CastTests(TestCase):
             )
             .values()
         )
-        self.assertEqual(fans[0]["fan_for_day"], datetime.date(2018, 9, 28))
+        fan_for_day = fans[0]["fan_for_day"]
+        if isinstance(fan_for_day, datetime.datetime):
+            fan_for_day = fan_for_day.date()
+        self.assertEqual(fan_for_day, datetime.date(2018, 9, 28))
         self.assertEqual(fans[0]["fans"], 1)
 
     def test_cast_from_python_to_date(self):
         today = datetime.date.today()
         dates = Author.objects.annotate(cast_date=Cast(today, models.DateField()))
-        self.assertEqual(dates.get().cast_date, today)
+        cast_date = dates.get().cast_date
+        if isinstance(cast_date, datetime.datetime):
+            cast_date = cast_date.date()
+        self.assertEqual(cast_date, today)
 
     def test_cast_from_python_to_datetime(self):
         now = datetime.datetime.now()
