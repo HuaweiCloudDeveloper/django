@@ -373,9 +373,9 @@ class CheckConstraintTests(TestCase):
             constraint_with_pk.validate(ChildModel, ChildModel(id=1, age=1))
         constraint_with_pk.validate(ChildModel, ChildModel(pk=1, age=1), exclude={"pk"})
 
-    @skipUnlessDBFeature("supports_json_field")
+    @skipUnlessDBFeature("supports_jsonfield_check_constraints")
     def test_validate_jsonfield_exact(self):
-        # data = {"release": "5.0.2", "version": "stable"}
+        data = {"release": "5.0.2", "version": "stable"}
         json_exact_constraint = models.CheckConstraint(
             condition=models.Q(data__version="stable"),
             name="only_stable_version",

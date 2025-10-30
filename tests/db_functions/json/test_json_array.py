@@ -10,7 +10,6 @@ from django.utils import timezone
 from ..models import Article, Author
 
 
-@skipUnlessDBFeature("supports_json_field")
 class JSONArrayTests(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -86,7 +85,7 @@ class JSONArrayTests(TestCase):
         obj = Article.objects.annotate(json_array=JSONArray(F("text"))).first()
         self.assertEqual(obj.json_array, ["x" * 4000])
 
-    @unittest.skipUnless(connection.vendor == "postgresql", "PostgreSQL specific tests")
+    @unittest.skipUnless(connection.vendor == "gaussdb", "GaussDB specific tests")
     def test_explicit_cast(self):
         qs = Author.objects.annotate(
             json_array=JSONArray(Cast("age", CharField()))
@@ -107,7 +106,6 @@ class JSONArrayTests(TestCase):
         )
         self.assertQuerySetEqual(qs, Author.objects.order_by("-alias"))
 
-
 @skipIfDBFeature("supports_json_field")
 class JSONArrayNotSupportedTests(TestCase):
     def test_not_supported(self):
@@ -116,7 +114,6 @@ class JSONArrayNotSupportedTests(TestCase):
             Author.objects.annotate(json_array=JSONArray()).first()
 
 
-@skipUnlessDBFeature("has_json_object_function", "supports_json_field")
 class JSONArrayObjectTests(TestCase):
     @classmethod
     def setUpTestData(cls):
