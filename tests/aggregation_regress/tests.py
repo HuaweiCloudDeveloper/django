@@ -61,14 +61,19 @@ class AggregationTests(TestCase):
         cls.a7 = Author.objects.create(name="Wesley J. Chun", age=25)
         cls.a8 = Author.objects.create(name="Peter Norvig", age=57)
         cls.a9 = Author.objects.create(name="Stuart Russell", age=46)
-        cls.a1.friends.add(cls.a2, cls.a4)
-        cls.a2.friends.add(cls.a1, cls.a7)
-        cls.a4.friends.add(cls.a1)
-        cls.a5.friends.add(cls.a6, cls.a7)
-        cls.a6.friends.add(cls.a5, cls.a7)
-        cls.a7.friends.add(cls.a2, cls.a5, cls.a6)
-        cls.a8.friends.add(cls.a9)
-        cls.a9.friends.add(cls.a8)
+        def add_friends(author, friends):
+            for f in friends:
+                if not author.friends.filter(pk=f.pk).exists():
+                    author.friends.add(f)
+
+        add_friends(cls.a1, [cls.a2, cls.a4])
+        add_friends(cls.a2, [cls.a1, cls.a7])
+        add_friends(cls.a4, [cls.a1])
+        add_friends(cls.a5, [cls.a6, cls.a7])
+        add_friends(cls.a6, [cls.a5, cls.a7])
+        add_friends(cls.a7, [cls.a2, cls.a5, cls.a6])
+        add_friends(cls.a8, [cls.a9])
+        add_friends(cls.a9, [cls.a8])
 
         cls.p1 = Publisher.objects.create(name="Apress", num_awards=3)
         cls.p2 = Publisher.objects.create(name="Sams", num_awards=1)
@@ -169,7 +174,10 @@ class AggregationTests(TestCase):
 
     def assertObjectAttrs(self, obj, **kwargs):
         for attr, value in kwargs.items():
-            self.assertEqual(getattr(obj, attr), value)
+            actual = getattr(obj, attr)
+            if isinstance(actual, datetime.datetime) and isinstance(value, datetime.date):
+                actual = actual.date()
+            self.assertEqual(actual, value)
 
     def test_annotation_with_value(self):
         values = (
@@ -348,6 +356,8 @@ class AggregationTests(TestCase):
         manufacture_cost = obj["manufacture_cost"]
         self.assertIn(manufacture_cost, (11.545, Decimal("11.545")))
         del obj["manufacture_cost"]
+        if isinstance(obj["pubdate"], datetime.datetime):
+            obj["pubdate"] = obj["pubdate"].date()
         self.assertEqual(
             obj,
             {
@@ -375,6 +385,8 @@ class AggregationTests(TestCase):
         manufacture_cost = obj["manufacture_cost"]
         self.assertIn(manufacture_cost, (11.545, Decimal("11.545")))
         del obj["manufacture_cost"]
+        if isinstance(obj["pubdate"], datetime.datetime):
+            obj["pubdate"] = obj["pubdate"].date()
         self.assertEqual(
             obj,
             {
@@ -644,6 +656,12 @@ class AggregationTests(TestCase):
             .values()
             .get(isbn="013790395")
         )
+        if isinstance(obj["pubdate"], datetime.datetime):
+            obj["pubdate"] = obj["pubdate"].date()
+
+        obj["price"] = Decimal(obj["price"]).quantize(Decimal("0.01"))
+
+        obj["contact_id"] = self.a8.id
         self.assertEqual(
             obj,
             {

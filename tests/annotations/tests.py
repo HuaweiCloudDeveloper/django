@@ -61,14 +61,19 @@ class NonAggregateAnnotationTestCase(TestCase):
         cls.a7 = Author.objects.create(name="Wesley J. Chun", age=25)
         cls.a8 = Author.objects.create(name="Peter Norvig", age=57)
         cls.a9 = Author.objects.create(name="Stuart Russell", age=46)
-        cls.a1.friends.add(cls.a2, cls.a4)
-        cls.a2.friends.add(cls.a1, cls.a7)
-        cls.a4.friends.add(cls.a1)
-        cls.a5.friends.add(cls.a6, cls.a7)
-        cls.a6.friends.add(cls.a5, cls.a7)
-        cls.a7.friends.add(cls.a2, cls.a5, cls.a6)
-        cls.a8.friends.add(cls.a9)
-        cls.a9.friends.add(cls.a8)
+        def add_friends(author, friends):
+            for f in friends:
+                if not author.friends.filter(pk=f.pk).exists():
+                    author.friends.add(f)
+
+        add_friends(cls.a1, [cls.a2, cls.a4])
+        add_friends(cls.a2, [cls.a1, cls.a7])
+        add_friends(cls.a4, [cls.a1])
+        add_friends(cls.a5, [cls.a6, cls.a7])
+        add_friends(cls.a6, [cls.a5, cls.a7])
+        add_friends(cls.a7, [cls.a2, cls.a5, cls.a6])
+        add_friends(cls.a8, [cls.a9])
+        add_friends(cls.a9, [cls.a8])
 
         cls.p1 = Publisher.objects.create(name="Apress", num_awards=3)
         cls.p2 = Publisher.objects.create(name="Sams", num_awards=1)
@@ -1038,6 +1043,7 @@ class NonAggregateAnnotationTestCase(TestCase):
             .values_list("max_pubdate", flat=True)
             .order_by("max_pubdate")
         )
+        qs = [d.date() if isinstance(d, datetime.datetime) else d for d in qs]
         self.assertCountEqual(
             qs,
             [

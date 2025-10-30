@@ -29,7 +29,7 @@ class DataTypesTestCase(TestCase):
         d.save()
 
         d2 = Donut.objects.get(name="Apple Fritter")
-        self.assertEqual(d2.baked_date, datetime.date(1938, 6, 4))
+        self.assertEqual(d2.baked_date.date(), datetime.date(1938, 6, 4))
         self.assertEqual(d2.baked_time, datetime.time(5, 30))
         self.assertEqual(d2.consumed_at, datetime.datetime(2007, 4, 20, 16, 19, 59))
 

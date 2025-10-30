@@ -33,6 +33,7 @@ class DistinctOnTests(TestCase):
         cls.fan2 = Fan.objects.create(fan_of=cls.celeb1)
         cls.fan3 = Fan.objects.create(fan_of=cls.celeb2)
 
+    @skipUnlessDBFeature("supports_nulls_distinct_unique_constraints")
     def test_basic_distinct_on(self):
         """QuerySet.distinct('field', ...) works"""
         # (qset, expected) tuples

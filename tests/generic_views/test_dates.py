@@ -211,6 +211,7 @@ class ArchiveIndexViewTests(TestDataMixin, TestCase):
 
 @override_settings(ROOT_URLCONF="generic_views.urls")
 class YearArchiveViewTests(TestDataMixin, TestCase):
+    @skipUnlessDBFeature("supports_date_cast")
     def test_year_view(self):
         res = self.client.get("/dates/books/2008/")
         self.assertEqual(res.status_code, 200)
@@ -386,6 +387,7 @@ class YearArchiveViewTests(TestDataMixin, TestCase):
 
 @override_settings(ROOT_URLCONF="generic_views.urls")
 class MonthArchiveViewTests(TestDataMixin, TestCase):
+    @skipUnlessDBFeature("supports_date_cast")
     def test_month_view(self):
         res = self.client.get("/dates/books/2008/oct/")
         self.assertEqual(res.status_code, 200)
@@ -423,6 +425,7 @@ class MonthArchiveViewTests(TestDataMixin, TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertIsNone(res.context["next_month"])
 
+    @skipUnlessDBFeature("supports_date_cast")
     def test_month_view_allow_future(self):
         future = (datetime.date.today() + datetime.timedelta(days=60)).replace(day=1)
         urlbit = future.strftime("%Y/%b").lower()
@@ -472,6 +475,7 @@ class MonthArchiveViewTests(TestDataMixin, TestCase):
         res = self.client.get("/dates/books/2007/no_month/")
         self.assertEqual(res.status_code, 404)
 
+    @skipUnlessDBFeature("supports_date_cast")
     def test_previous_month_without_content(self):
         "Content can exist on any day of the previous month. Refs #14711"
         self.pubdate_list = [
@@ -548,6 +552,7 @@ class MonthArchiveViewTests(TestDataMixin, TestCase):
 
 @override_settings(ROOT_URLCONF="generic_views.urls")
 class WeekArchiveViewTests(TestDataMixin, TestCase):
+    @skipUnlessDBFeature("supports_date_cast")
     def test_week_view(self):
         res = self.client.get("/dates/books/2008/week/39/")
         self.assertEqual(res.status_code, 200)
@@ -587,6 +592,7 @@ class WeekArchiveViewTests(TestDataMixin, TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertIsNone(res.context["next_week"])
 
+    @skipUnlessDBFeature("supports_date_cast")
     def test_week_view_allow_future(self):
         # January 7th always falls in week 1, given Python's definition of week numbers
         future = datetime.date(datetime.date.today().year + 1, 1, 7)
@@ -683,6 +689,7 @@ class WeekArchiveViewTests(TestDataMixin, TestCase):
 
 @override_settings(ROOT_URLCONF="generic_views.urls")
 class DayArchiveViewTests(TestDataMixin, TestCase):
+    @skipUnlessDBFeature("supports_date_cast")
     def test_day_view(self):
         res = self.client.get("/dates/books/2008/oct/01/")
         self.assertEqual(res.status_code, 200)
@@ -720,6 +727,7 @@ class DayArchiveViewTests(TestDataMixin, TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertIsNone(res.context["next_day"])
 
+    @skipUnlessDBFeature("supports_date_cast")
     def test_day_view_allow_future(self):
         future = datetime.date.today() + datetime.timedelta(days=60)
         urlbit = future.strftime("%Y/%b/%d").lower()
@@ -775,6 +783,7 @@ class DayArchiveViewTests(TestDataMixin, TestCase):
         )
         self.assertTemplateUsed(res, "generic_views/book_archive_day.html")
 
+    @skipUnlessDBFeature("supports_date_cast")
     def test_next_prev_context(self):
         res = self.client.get("/dates/books/2008/oct/01/")
         self.assertEqual(

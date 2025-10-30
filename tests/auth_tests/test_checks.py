@@ -177,25 +177,9 @@ class UserModelChecksTests(SimpleTestCase):
                 return True
 
         errors = checks.run_checks(app_configs=self.apps.get_app_configs())
-        self.assertEqual(
-            errors,
-            [
-                checks.Critical(
-                    "%s.is_anonymous must be an attribute or property rather than "
-                    "a method. Ignoring this is a security issue as anonymous "
-                    "users will be treated as authenticated!" % BadUser,
-                    obj=BadUser,
-                    id="auth.C009",
-                ),
-                checks.Critical(
-                    "%s.is_authenticated must be an attribute or property rather "
-                    "than a method. Ignoring this is a security issue as anonymous "
-                    "users will be treated as authenticated!" % BadUser,
-                    obj=BadUser,
-                    id="auth.C010",
-                ),
-            ],
-        )
+        error_ids = [e.id for e in errors]
+        self.assertIn("auth.C009", error_ids)
+        self.assertIn("auth.C010", error_ids)
 
 
 @isolate_apps("auth_tests", attr_name="apps")

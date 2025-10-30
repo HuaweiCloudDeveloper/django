@@ -528,6 +528,10 @@ class ModelPaginationTests(TestCase):
             "Pagination may yield inconsistent results with an unordered "
             "object_list: <class 'pagination.models.Article'> QuerySet."
         )
+        qs = Article.objects.all()
+        print(f"qs.__class__:{qs.__class__}")
+        print(f"qs.model:{qs.model}")
+        print(f"type(qs.model):{type(qs.model)}")
         with self.assertWarnsMessage(UnorderedObjectListWarning, msg) as cm:
             Paginator(Article.objects.all(), 5)
         # The warning points at the Paginator caller (i.e. the stacklevel

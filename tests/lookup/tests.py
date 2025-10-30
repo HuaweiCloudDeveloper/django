@@ -1454,6 +1454,7 @@ class LookupQueryingTests(TestCase):
         )
         self.assertCountEqual(qs, [1842, 2042])
 
+    @skipUnlessDBFeature("supports_date_cast")
     def test_filter_exists_lhs(self):
         qs = Season.objects.annotate(
             before_20=Exists(

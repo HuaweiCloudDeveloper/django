@@ -3,6 +3,7 @@ import getpass
 import os
 import sys
 from datetime import date
+import datetime
 from io import StringIO
 from unittest import mock
 
@@ -401,7 +402,10 @@ class CreatesuperuserManagementCommandTestCase(TestCase):
         command_output = new_io.getvalue().strip()
         self.assertEqual(command_output, "Superuser created successfully.")
         u = CustomUser._default_manager.get(email="joe@somewhere.org")
-        self.assertEqual(u.date_of_birth, date(1976, 4, 1))
+        birth = u.date_of_birth
+        if isinstance(birth, datetime.datetime):
+            birth = birth.date()
+        self.assertEqual(birth, date(1976, 4, 1))
 
         # created password should be unusable
         self.assertFalse(u.has_usable_password())

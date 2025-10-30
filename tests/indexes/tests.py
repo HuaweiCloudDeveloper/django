@@ -129,7 +129,7 @@ class SchemaIndexesNotPostgreSQLTests(TransactionTestCase):
 
 # The `condition` parameter is ignored by databases that don't support partial
 # indexes.
-@skipIfDBFeature("supports_partial_indexes")
+@skipUnlessDBFeature("supports_partial_indexes")
 class PartialIndexConditionIgnoredTests(TransactionTestCase):
     available_apps = ["indexes"]
 

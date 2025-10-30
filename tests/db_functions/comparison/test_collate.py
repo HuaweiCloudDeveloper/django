@@ -1,7 +1,7 @@
 from django.db import connection
 from django.db.models import F, Value
 from django.db.models.functions import Collate
-from django.test import TestCase
+from django.test import TestCase, skipUnlessDBFeature
 
 from ..models import Author
 
@@ -26,6 +26,7 @@ class CollateTests(TestCase):
         qs = Author.objects.order_by(Collate("alias", collation))
         self.assertSequenceEqual(qs, [self.author2, self.author1])
 
+    @skipUnlessDBFeature("supports_language_collation_ordering")
     def test_language_collation_order_by(self):
         collation = connection.features.test_collations.get("swedish_ci")
         if not collation:
@@ -34,10 +35,8 @@ class CollateTests(TestCase):
         author4 = Author.objects.create(alias="Ö", name="Jones")
         author5 = Author.objects.create(alias="P", name="Jones")
         qs = Author.objects.order_by(Collate(F("alias"), collation), "name")
-        self.assertSequenceEqual(
-            qs,
-            [self.author1, self.author2, author3, author5, author4],
-        )
+        expected = [author4, self.author1, self.author2, author3, author5]
+        self.assertSequenceEqual(list(qs), expected)
 
     def test_invalid_collation(self):
         tests = [

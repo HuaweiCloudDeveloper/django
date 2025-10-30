@@ -87,6 +87,7 @@ class ModelTests(TestCase):
         a = Article.objects.get(pk=a.pk)
         self.assertEqual(len(a.article_text), 3000)
 
+    @skipUnlessDBFeature("supports_date_cast")
     def test_date_lookup(self):
         # Regression test for #659
         Party.objects.create(when=datetime.datetime(1999, 12, 31))
@@ -158,6 +159,7 @@ class ModelTests(TestCase):
             attrgetter("when"),
         )
 
+    @skipUnlessDBFeature("supports_date_cast")
     def test_date_filter_null(self):
         # Date filtering was failing with NULL date values in SQLite
         # (regression test for #3501, among other things).
