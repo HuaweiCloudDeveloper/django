@@ -47,7 +47,7 @@ class Article(models.Model):
     )
 
     def __str__(self):
-        return str(self.title) if self.title else f"Article #{self.pk or 'unsaved'}"
+        return self.title
 
     @admin.display(ordering="date", description="")
     def model_year(self):
